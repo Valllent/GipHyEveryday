@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id "kotlin-kapt"
 }
 
 android {
@@ -50,6 +51,20 @@ dependencies {
     // Basic
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
+
+    // Splash screen
+    implementation "androidx.core:core-splashscreen:1.0.0"
+
+    // Network
+    implementation "com.squareup.retrofit2:retrofit:2.9.0"
+    implementation "com.squareup.retrofit2:converter-moshi:2.9.0"
+    implementation 'com.squareup.moshi:moshi:1.14.0'
+    kapt "com.squareup.moshi:moshi-kotlin-codegen:1.14.0"
+
+    // Image downloader
+    implementation "com.github.skydoves:landscapist-glide:2.1.8"
+//    implementation 'com.github.bumptech.glide:glide:4.15.1'
+//    implementation "com.github.bumptech.glide:compose:1.0.0-alpha.3"
 
 
     /* --- Compose Dependencies --- */

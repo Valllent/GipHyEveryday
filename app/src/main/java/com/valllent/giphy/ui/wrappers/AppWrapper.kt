@@ -1,15 +1,13 @@
-package com.valllent.giphy.ui
+package com.valllent.giphy.ui.wrappers
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.valllent.giphy.MainActivityViewModel
-import com.valllent.giphy.data.User
-import com.valllent.giphy.ui.screens.UserDetailScreen
-import com.valllent.giphy.ui.screens.UserListScreen
-import com.valllent.giphy.ui.views.ScreenWrapper
+import com.valllent.giphy.activities.main.MainActivityViewModel
+import com.valllent.giphy.data.Gif
+import com.valllent.giphy.ui.screens.ListOfGifsScreen
 
 sealed class Screen(private val route: String) {
     object List : Screen("user/list") {
@@ -29,7 +27,7 @@ sealed class Screen(private val route: String) {
 
 @Composable
 fun AppWrapper(viewModel: MainActivityViewModel) {
-    ScreenWrapper {
+    ScaffoldWrapper {
         val navController = rememberNavController()
         NavHost(navController, startDestination = Screen.List()) {
             List(
@@ -41,15 +39,15 @@ fun AppWrapper(viewModel: MainActivityViewModel) {
     }
 }
 
-fun NavGraphBuilder.List(viewModel: MainActivityViewModel, onItemClick: (User) -> Unit) {
+fun NavGraphBuilder.List(viewModel: MainActivityViewModel, onItemClick: (Gif) -> Unit) {
     composable(route = Screen.List()) {
-        UserListScreen(viewModel.listOfUsers, onItemClick)
+        ListOfGifsScreen()
     }
 }
 
 fun NavGraphBuilder.Detail(viewModel: MainActivityViewModel) {
     composable(route = Screen.Detail()) { navStack ->
         val userId = navStack.arguments?.getString("userId")?.toIntOrNull()!!
-        UserDetailScreen(viewModel.listOfUsers.firstOrNull { it.id == userId }!!)
+//        UserDetailScreen(viewModel.listOfUsers.firstOrNull { it.id == userId }!!)
     }
 }
