@@ -6,5 +6,8 @@ data class Gif(
     val width: Int,
     val height: Int,
     val originalUrl: String,
+    val mediumUrl: String,
     val thumbnailUrl: String,
+    val postedBy: String,
+    val postedDatetime: String
 )

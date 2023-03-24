@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         showSplashScreen()
         super.onCreate(savedInstanceState)
-        setContent { AppWrapper(viewModel) }
+        setContent { AppWrapper() }
     }
 
     private fun showSplashScreen() {

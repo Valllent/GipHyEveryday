@@ -12,6 +12,10 @@ open class BaseViewModel : ViewModel() {
         private const val TAG = "BaseViewModel"
     }
 
+    init {
+        Log.d(TAG, "Created new ViewModel: ${this.javaClass}")
+    }
+
     protected val coroutineContext = CoroutineExceptionHandler { coroutineContext, throwable ->
         logError(throwable)
     }

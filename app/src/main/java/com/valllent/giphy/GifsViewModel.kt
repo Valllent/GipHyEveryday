@@ -7,7 +7,7 @@ import com.valllent.giphy.network.NetworkModule
 import com.valllent.giphy.network.data.responses.GifsResponse
 import kotlinx.coroutines.delay
 
-class ListOfGifsScreenViewModel : BaseViewModel() {
+class GifsViewModel : BaseViewModel() {
 
     enum class DataFetchingStatus {
         IN_PROGRESS,
@@ -22,7 +22,13 @@ class ListOfGifsScreenViewModel : BaseViewModel() {
     val gifs: State<List<Gif>> = _gifs
 
     init {
+        fetchGifs()
+    }
+
+    fun fetchGifs() {
         launch {
+            _dataFetchingStatus.value = DataFetchingStatus.IN_PROGRESS
+            delay(1_000)
             val result = runSafely {
                 NetworkModule.gifsApi.getTrendingGifs()
             }
@@ -32,11 +38,6 @@ class ListOfGifsScreenViewModel : BaseViewModel() {
                 _gifs.value = convertGifResponse(result)
                 _dataFetchingStatus.value = DataFetchingStatus.FETCHED
             }
-
-            delay(10_000)
-            val gifs = ArrayList(_gifs.value)
-            gifs.add(Gif("1", "title", 100, 100, "original", "preview"))
-            _gifs.value = gifs
         }
     }
 
@@ -49,12 +50,15 @@ class ListOfGifsScreenViewModel : BaseViewModel() {
 
             gifs.add(
                 Gif(
-                    responseGif.id,
-                    responseGif.title ?: "",
-                    responseGif.urls?.originalUrl?.width ?: 100,
-                    responseGif.urls?.originalUrl?.height ?: 100,
-                    responseGif.urls?.originalUrl?.urlValue ?: "",
-                    responseGif.urls?.previewUrl?.urlValue ?: ""
+                    id = responseGif.id,
+                    title = responseGif.title ?: "",
+                    width = responseGif.urls?.originalUrl?.width ?: 100,
+                    height = responseGif.urls?.originalUrl?.height ?: 100,
+                    originalUrl = responseGif.urls?.originalUrl?.urlValue ?: "",
+                    mediumUrl = responseGif.urls?.mediumUrl?.urlValue ?: "",
+                    thumbnailUrl = responseGif.urls?.previewUrl?.urlValue ?: "",
+                    postedBy = responseGif.username ?: "",
+                    postedDatetime = responseGif.postedDatetime ?: ""
                 )
             )
         }
