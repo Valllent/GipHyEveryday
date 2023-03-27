@@ -3,12 +3,15 @@ package com.valllent.giphy.ui.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemsIndexed
 import com.valllent.giphy.GifsViewModel
 import com.valllent.giphy.data.Gif
 import com.valllent.giphy.ui.preview.GifPreviewData
@@ -26,36 +29,69 @@ fun ListOfGifsScreen(
     viewModel: GifsViewModel,
     onItemClick: OnGifClick
 ) {
-    when (viewModel.dataFetchingStatus.value) {
-        GifsViewModel.DataFetchingStatus.FETCHED -> {
-            ListOfGifs(viewModel.gifs.value, onItemClick)
-        }
-
-        GifsViewModel.DataFetchingStatus.IN_PROGRESS -> {
-            InProgress()
-        }
-
-        GifsViewModel.DataFetchingStatus.FAILED -> {
-            DataFetchingFailed(onRetryClick = {
-                viewModel.fetchGifs()
-            })
-        }
-    }
+    val gifsFlow = viewModel.gifsFlow
+    val lazyPagingItems = gifsFlow.collectAsLazyPagingItems()
+    ListOfGifs(lazyPagingItems, onItemClick)
 }
 
 @Composable
-private fun ListOfGifs(listOfGifs: List<Gif>, onItemClick: OnGifClick) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        LazyColumn {
-            itemsIndexed(
-                listOfGifs,
-                key = { _, gif -> gif.id }
-            ) { i, gif ->
-                GifItem(i, gif, onItemClick)
+private fun ListOfGifs(lazyListOfGifs: LazyPagingItems<Gif>, onItemClick: OnGifClick) {
+    val refreshState = lazyListOfGifs.loadState.refresh
+    val appendState = lazyListOfGifs.loadState.append
+
+    when (refreshState) {
+        is LoadState.NotLoading -> {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                LazyColumn {
+                    itemsIndexed(
+                        lazyListOfGifs,
+                        key = { _, gif -> gif.id }
+                    ) { i, gif ->
+                        if (gif != null) {
+                            GifItem(i, gif, onItemClick)
+                        }
+                    }
+
+                    when (appendState) {
+                        is LoadState.Loading -> {
+                            item {
+                                InProgress(
+                                    modifier = Modifier
+                                        .height(100.dp),
+                                    fraction = 0.6f
+                                )
+                            }
+                        }
+                        is LoadState.Error -> {
+                            item {
+                                DataFetchingFailed(
+                                    modifier = Modifier.height(100.dp),
+                                    onRetryClick = {
+                                        lazyListOfGifs.retry()
+                                    }
+                                )
+                            }
+                        }
+                        else -> {}
+                    }
+                }
             }
         }
+
+        is LoadState.Loading -> {
+            InProgress(
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+
+        is LoadState.Error -> {
+            DataFetchingFailed(onRetryClick = {
+                lazyListOfGifs.retry()
+            })
+        }
+
     }
 }
 
@@ -67,8 +103,9 @@ private fun GifItem(
     onItemClick: OnGifClick
 ) {
     Column(
-        Modifier.fillMaxWidth()
-            .padding(bottom = 16.dp)
+        Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp)
     ) {
         TitleOnSurface(
             gif.title,
@@ -95,7 +132,11 @@ private fun GifItem(
 @Composable
 fun ListOfGifsPreview() {
     ProjectTheme {
-        ListOfGifs(GifPreviewData.getList()) { _, _ -> }
+        Column {
+            GifPreviewData.getList().forEachIndexed { i, gif ->
+                GifItem(i, gif) { i, gif -> }
+            }
+        }
     }
 }
 

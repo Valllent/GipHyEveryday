@@ -6,7 +6,7 @@ import com.valllent.giphy.network.data.other.GifItemResponse
 import com.valllent.giphy.network.data.other.PaginationResponse
 
 @JsonClass(generateAdapter = true)
-data class GifsResponse(
+data class GifResponse(
     @field:Json(name = "data") var gifsList: List<GifItemResponse?>?,
     @field:Json(name = "pagination") var pagination: PaginationResponse?,
 ) {

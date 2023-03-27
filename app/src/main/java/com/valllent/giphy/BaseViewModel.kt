@@ -3,6 +3,7 @@ package com.valllent.giphy
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.valllent.giphy.utils.CoroutineExtensions
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 
@@ -21,11 +22,7 @@ open class BaseViewModel : ViewModel() {
     }
 
     protected suspend fun <T> runSafely(code: suspend () -> T?): T? {
-        val catchingResult = runCatching { code() }
-        catchingResult.onFailure {
-            logError(it)
-        }
-        return catchingResult.getOrNull()
+        return CoroutineExtensions.runSafely(code)
     }
 
     protected fun launch(code: suspend () -> Unit) {

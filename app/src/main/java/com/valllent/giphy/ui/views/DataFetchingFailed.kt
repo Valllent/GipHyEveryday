@@ -15,9 +15,12 @@ import com.valllent.giphy.ui.theme.ProjectTheme
 
 
 @Composable
-fun DataFetchingFailed(onRetryClick: () -> Unit) {
+fun DataFetchingFailed(
+    modifier: Modifier = Modifier,
+    onRetryClick: () -> Unit
+) {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
