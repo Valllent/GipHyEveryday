@@ -5,7 +5,7 @@ import com.valllent.giphy.ui.theme.ProjectTheme
 
 @Composable
 fun PreviewWrapper(content: @Composable () -> Unit) {
-    ProjectTheme {
+    ProjectTheme(useDynamicColors = false) {
         content()
     }
 }

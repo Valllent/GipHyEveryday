@@ -2,6 +2,7 @@ package com.valllent.giphy.ui.views
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -9,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.valllent.giphy.R
 import com.valllent.giphy.ui.theme.ProjectTheme
 
@@ -25,8 +25,9 @@ fun DataFetchingFailed(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                stringResource(R.string.can_not_fetch_data),
-                fontSize = 18.sp
+                text = stringResource(R.string.can_not_fetch_data),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.height(8.dp))
             Button(
@@ -35,8 +36,8 @@ fun DataFetchingFailed(
                 }
             ) {
                 Text(
-                    stringResource(R.string.retry),
-                    fontSize = 24.sp
+                    text = stringResource(R.string.retry),
+                    style = MaterialTheme.typography.titleMedium
                 )
             }
         }

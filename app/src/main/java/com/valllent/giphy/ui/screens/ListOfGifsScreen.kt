@@ -105,7 +105,7 @@ private fun GifItem(
     Column(
         Modifier
             .fillMaxWidth()
-            .padding(top = 8.dp)
+            .padding(top = 12.dp)
     ) {
         TitleOnSurface(
             gif.title,
@@ -114,13 +114,15 @@ private fun GifItem(
                 onItemClick(index, gif)
             }
         )
-        Box(
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(gif.width / gif.height.toFloat())
                 .clickable {
                     onItemClick(index, gif)
-                }
+                },
+            tonalElevation = 24.dp,
+            shadowElevation = 8.dp
         ) {
             ImageFromNetwork(gif.mediumUrl, gif.title, thumbnailUrl = gif.thumbnailUrl)
         }

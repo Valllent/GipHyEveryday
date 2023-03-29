@@ -1,7 +1,6 @@
 package com.valllent.giphy.ui.views
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -17,7 +16,7 @@ import com.valllent.giphy.R
 @Composable
 fun Logo(modifier: Modifier = Modifier, fontSize: TextUnit = 28.sp) {
     Surface(
-        shape = RoundedCornerShape(50),
+        shape = MaterialTheme.shapes.large,
         modifier = modifier.padding(16.dp),
         shadowElevation = 10.dp,
         tonalElevation = 10.dp,
