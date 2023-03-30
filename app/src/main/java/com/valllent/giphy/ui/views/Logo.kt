@@ -17,7 +17,7 @@ import com.valllent.giphy.R
 fun Logo(modifier: Modifier = Modifier, fontSize: TextUnit = 28.sp) {
     Surface(
         shape = MaterialTheme.shapes.large,
-        modifier = modifier.padding(16.dp),
+        modifier = modifier.padding(8.dp),
         shadowElevation = 10.dp,
         tonalElevation = 10.dp,
         color = MaterialTheme.colorScheme.primary,

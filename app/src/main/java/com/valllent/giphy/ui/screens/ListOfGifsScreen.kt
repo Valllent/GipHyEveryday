@@ -1,97 +1,150 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.valllent.giphy.ui.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import com.valllent.giphy.GifsViewModel
+import com.valllent.giphy.R
 import com.valllent.giphy.data.Gif
 import com.valllent.giphy.ui.preview.GifPreviewData
 import com.valllent.giphy.ui.theme.ProjectTheme
-import com.valllent.giphy.ui.views.DataFetchingFailed
-import com.valllent.giphy.ui.views.ImageFromNetwork
-import com.valllent.giphy.ui.views.InProgress
-import com.valllent.giphy.ui.views.TitleOnSurface
+import com.valllent.giphy.ui.views.*
+import com.valllent.giphy.ui.wrappers.ScaffoldWrapper
+import kotlinx.coroutines.launch
 
 
 typealias OnGifClick = (Int, Gif) -> Unit
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ListOfGifsScreen(
     viewModel: GifsViewModel,
     onItemClick: OnGifClick
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
+    val lazyListState = rememberLazyListState()
+    val searchFieldFocusRequester = FocusRequester()
+
     val gifsFlow = viewModel.gifsFlow
-    val lazyPagingItems = gifsFlow.collectAsLazyPagingItems()
-    ListOfGifs(lazyPagingItems, onItemClick)
-}
+    val lazyPagingGifs = gifsFlow.collectAsLazyPagingItems()
 
-@Composable
-private fun ListOfGifs(lazyListOfGifs: LazyPagingItems<Gif>, onItemClick: OnGifClick) {
-    val refreshState = lazyListOfGifs.loadState.refresh
-    val appendState = lazyListOfGifs.loadState.append
+    val refreshState = lazyPagingGifs.loadState.refresh
+    val appendState = lazyPagingGifs.loadState.append
+    val searchRequest = remember { mutableStateOf("") }
+    val searchIsActivated = remember { mutableStateOf(false) }
 
-    when (refreshState) {
-        is LoadState.NotLoading -> {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                LazyColumn {
-                    itemsIndexed(
-                        lazyListOfGifs,
-                        key = { _, gif -> gif.id }
-                    ) { i, gif ->
-                        if (gif != null) {
-                            GifItem(i, gif, onItemClick)
-                        }
-                    }
+    if (searchIsActivated.value) {
+        LaunchedEffect(searchIsActivated.value) {
+            if (lazyListState.firstVisibleItemIndex < 2) {
+                lazyListState.animateScrollToItem(0)
+            }
+            searchFieldFocusRequester.requestFocus()
+        }
+    }
 
-                    when (appendState) {
-                        is LoadState.Loading -> {
-                            item {
-                                InProgress(
-                                    modifier = Modifier
-                                        .height(100.dp),
-                                    fraction = 0.6f
+    ScaffoldWrapper(
+        topAppBarActions = {
+            val icon = if (searchIsActivated.value) Icons.Default.Close else Icons.Default.Search
+            val description =
+                stringResource(if (searchIsActivated.value) R.string.close else R.string.search)
+            ProjectIconButton(
+                imageVector = icon,
+                contentDescription = description,
+                onClick = {
+                    searchIsActivated.value = searchIsActivated.value.not()
+                }
+            )
+        },
+        onTopAppBarLogoClick = {
+            coroutineScope.launch {
+                lazyListState.animateScrollToItem(0)
+            }
+        }
+    ) {
+
+        when (refreshState) {
+            is LoadState.NotLoading -> {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    LazyColumn(
+                        state = lazyListState
+                    ) {
+                        if (searchIsActivated.value) {
+                            stickyHeader {
+                                SearchField(
+                                    searchRequest,
+                                    searchFieldFocusRequester
                                 )
                             }
                         }
-                        is LoadState.Error -> {
-                            item {
-                                DataFetchingFailed(
-                                    modifier = Modifier.height(100.dp),
-                                    onRetryClick = {
-                                        lazyListOfGifs.retry()
-                                    }
-                                )
+                        itemsIndexed(
+                            lazyPagingGifs,
+                            key = { _, gif -> gif.id }
+                        ) { i, gif ->
+                            if (gif != null) {
+                                GifItem(i, gif, onItemClick)
                             }
                         }
-                        else -> {}
+
+                        when (appendState) {
+                            is LoadState.Loading -> {
+                                item {
+                                    InProgress(
+                                        modifier = Modifier
+                                            .height(100.dp),
+                                        fraction = 0.6f
+                                    )
+                                }
+                            }
+                            is LoadState.Error -> {
+                                item {
+                                    DataFetchingFailed(
+                                        modifier = Modifier.height(100.dp),
+                                        onRetryClick = {
+                                            lazyPagingGifs.retry()
+                                        }
+                                    )
+                                }
+                            }
+                            else -> {}
+                        }
                     }
                 }
             }
-        }
 
-        is LoadState.Loading -> {
-            InProgress(
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
+            is LoadState.Loading -> {
+                InProgress(
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
 
-        is LoadState.Error -> {
-            DataFetchingFailed(onRetryClick = {
-                lazyListOfGifs.retry()
-            })
-        }
+            is LoadState.Error -> {
+                DataFetchingFailed(onRetryClick = {
+                    lazyPagingGifs.retry()
+                })
+            }
 
+        }
     }
 }
 
@@ -136,7 +189,7 @@ fun ListOfGifsPreview() {
     ProjectTheme {
         Column {
             GifPreviewData.getList().forEachIndexed { i, gif ->
-                GifItem(i, gif) { i, gif -> }
+                GifItem(i, gif) { _, _ -> }
             }
         }
     }

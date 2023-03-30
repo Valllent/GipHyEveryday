@@ -10,6 +10,7 @@ import com.valllent.giphy.GifsViewModel
 import com.valllent.giphy.data.Gif
 import com.valllent.giphy.ui.screens.DetailGifScreen
 import com.valllent.giphy.ui.screens.ListOfGifsScreen
+import com.valllent.giphy.ui.theme.ProjectTheme
 
 sealed class Screen(private val route: String) {
 
@@ -30,7 +31,7 @@ sealed class Screen(private val route: String) {
 
 @Composable
 fun AppWrapper() {
-    ScaffoldWrapper {
+    ProjectTheme {
         val navController = rememberNavController()
         val gifsViewModel = viewModel<GifsViewModel>()
         NavHost(navController, startDestination = Screen.List()) {
@@ -53,7 +54,8 @@ fun NavGraphBuilder.List(viewModel: GifsViewModel, onItemClick: (Int, Gif) -> Un
 
 fun NavGraphBuilder.Detail(viewModel: GifsViewModel) {
     composable(route = Screen.Detail()) {
-        val selectedGifIndex = it.arguments?.getString(Screen.DETAIL_SCREEN_ARGUMENT_GIF_INDEX)?.toIntOrNull() ?: 0
+        val selectedGifIndex =
+            it.arguments?.getString(Screen.DETAIL_SCREEN_ARGUMENT_GIF_INDEX)?.toIntOrNull() ?: 0
         DetailGifScreen(viewModel, selectedGifIndex)
     }
 }

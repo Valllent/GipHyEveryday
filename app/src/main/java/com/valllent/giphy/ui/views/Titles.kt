@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -21,6 +22,8 @@ import com.valllent.giphy.ui.wrappers.PreviewWrapper
 fun TitleOnSurface(
     text: String,
     modifier: Modifier = Modifier,
+    textColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    backgroundColor: Color = MaterialTheme.colorScheme.primaryContainer,
     onClick: (() -> Unit)? = null
 ) {
     Surface(
@@ -34,8 +37,8 @@ fun TitleOnSurface(
                     it
                 }
             },
-        color = MaterialTheme.colorScheme.primaryContainer,
-        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        color = backgroundColor,
+        contentColor = textColor,
     ) {
         Text(
             text,

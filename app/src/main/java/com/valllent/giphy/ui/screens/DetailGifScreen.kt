@@ -22,46 +22,50 @@ import com.valllent.giphy.data.Gif
 import com.valllent.giphy.ui.preview.GifPreviewData
 import com.valllent.giphy.ui.views.*
 import com.valllent.giphy.ui.wrappers.PreviewWrapper
+import com.valllent.giphy.ui.wrappers.ScaffoldWrapper
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DetailGifScreen(gifsViewModel: GifsViewModel, selectedGifIndex: Int) {
-    val lazyGifs = gifsViewModel.gifsFlow.collectAsLazyPagingItems()
-    val appendState = lazyGifs.loadState.append
+    ScaffoldWrapper {
 
-    val addAdditionalItem = appendState !is LoadState.NotLoading
-    val itemsCount = if (lazyGifs.itemCount > 0) {
-        lazyGifs.itemCount + if (addAdditionalItem) 1 else 0
-    } else {
-        0
-    }
+        val lazyGifs = gifsViewModel.gifsFlow.collectAsLazyPagingItems()
+        val appendState = lazyGifs.loadState.append
 
-    HorizontalPager(
-        itemsCount,
-        state = rememberPagerState(selectedGifIndex),
-        key = { i ->
+        val addAdditionalItem = appendState !is LoadState.NotLoading
+        val itemsCount = if (lazyGifs.itemCount > 0) {
+            lazyGifs.itemCount + if (addAdditionalItem) 1 else 0
+        } else {
+            0
+        }
+
+        HorizontalPager(
+            itemsCount,
+            state = rememberPagerState(selectedGifIndex),
+            key = { i ->
+                val isPlaceholder = addAdditionalItem && i == lazyGifs.itemCount
+                if (isPlaceholder) {
+                    "Placeholder"
+                } else {
+                    lazyGifs.peek(i)?.id ?: ""
+                }
+            }
+        ) { i ->
             val isPlaceholder = addAdditionalItem && i == lazyGifs.itemCount
             if (isPlaceholder) {
-                "Placeholder"
+                if (appendState is LoadState.Loading) {
+                    InProgress()
+                } else {
+                    DataFetchingFailed(
+                        onRetryClick = {
+                            lazyGifs.retry()
+                        }
+                    )
+                }
             } else {
-                lazyGifs.peek(i)?.id ?: ""
-            }
-        }
-    ) { i ->
-        val isPlaceholder = addAdditionalItem && i == lazyGifs.itemCount
-        if (isPlaceholder) {
-            if (appendState is LoadState.Loading) {
-                InProgress()
-            } else {
-                DataFetchingFailed(
-                    onRetryClick = {
-                        lazyGifs.retry()
-                    }
-                )
-            }
-        } else {
-            lazyGifs[i]?.let {
-                DetailGif(it)
+                lazyGifs[i]?.let {
+                    DetailGif(it)
+                }
             }
         }
     }
