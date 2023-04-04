@@ -2,6 +2,8 @@
 
 package com.valllent.giphy.ui.screens
 
+import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,12 +11,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,37 +37,42 @@ import kotlinx.coroutines.launch
 
 typealias OnGifClick = (Int, Gif) -> Unit
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ListOfGifsScreen(
     viewModel: GifsViewModel,
     onItemClick: OnGifClick
 ) {
+    val searchIsActivated = rememberSaveable { mutableStateOf(false) }
+    val focusRequestedAlready = rememberSaveable { mutableStateOf(false) }
+    val currentGifsFlow = viewModel.currentGifsFlow.collectAsState()
+    val lazyPagingGifs = currentGifsFlow.value.collectAsLazyPagingItems()
+    val showingSearchResult = viewModel.showingSearchResult.collectAsState()
+
+    val mainLazyListState = rememberLazyListState()
+    var searchLazyListState = rememberLazyListState()
+    val currentLazyListState = if (showingSearchResult.value) searchLazyListState else mainLazyListState
     val coroutineScope = rememberCoroutineScope()
+    val searchFieldFocusRequester = remember { FocusRequester() }
 
-    val lazyListState = rememberLazyListState()
-    val searchFieldFocusRequester = FocusRequester()
-
-    val gifsFlow = viewModel.gifsFlow
-    val lazyPagingGifs = gifsFlow.collectAsLazyPagingItems()
-
-    val refreshState = lazyPagingGifs.loadState.refresh
-    val appendState = lazyPagingGifs.loadState.append
-    val searchRequest = remember { mutableStateOf("") }
-    val searchIsActivated = remember { mutableStateOf(false) }
-
-    if (searchIsActivated.value) {
-        LaunchedEffect(searchIsActivated.value) {
-            if (lazyListState.firstVisibleItemIndex < 2) {
-                lazyListState.animateScrollToItem(0)
+    LaunchedEffect(searchIsActivated.value) {
+        if (searchIsActivated.value) {
+            if (focusRequestedAlready.value.not()) {
+                if (currentLazyListState.firstVisibleItemIndex in 0..5) {
+                    currentLazyListState.animateScrollToItem(0)
+                }
+                searchFieldFocusRequester.requestFocus()
             }
-            searchFieldFocusRequester.requestFocus()
+            focusRequestedAlready.value = true
+        } else {
+            focusRequestedAlready.value = false
+            viewModel.closeSearch()
         }
     }
 
     ScaffoldWrapper(
         topAppBarActions = {
-            val icon = if (searchIsActivated.value) Icons.Default.Close else Icons.Default.Search
+            val icon = if (searchIsActivated.value) Icons.Default.Close else Icons.Outlined.Search
             val description =
                 stringResource(if (searchIsActivated.value) R.string.close else R.string.search)
             ProjectIconButton(
@@ -76,37 +85,66 @@ fun ListOfGifsScreen(
         },
         onTopAppBarLogoClick = {
             coroutineScope.launch {
-                lazyListState.animateScrollToItem(0)
+                currentLazyListState.animateScrollToItem(0)
             }
         }
     ) {
 
-        when (refreshState) {
+        when (lazyPagingGifs.loadState.refresh) {
             is LoadState.NotLoading -> {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                 ) {
                     LazyColumn(
-                        state = lazyListState
+                        state = currentLazyListState,
                     ) {
                         if (searchIsActivated.value) {
-                            stickyHeader {
+                            stickyHeader(
+                                key = "Search"
+                            ) {
+                                val backPressedDispatcher =
+                                    (LocalContext.current as ComponentActivity).onBackPressedDispatcher
+                                val backListener = remember {
+                                    object : OnBackPressedCallback(true) {
+                                        override fun handleOnBackPressed() {
+                                            searchIsActivated.value = false
+                                            viewModel.closeSearch()
+                                        }
+                                    }
+                                }
+
+                                DisposableEffect(backPressedDispatcher) {
+                                    backPressedDispatcher.addCallback(backListener)
+                                    onDispose {
+                                        backListener.remove()
+                                    }
+                                }
+
                                 SearchField(
-                                    searchRequest,
-                                    searchFieldFocusRequester
+                                    request = viewModel.searchRequest.collectAsState().value,
+                                    enabled = viewModel.searchRequestIsCorrect.value,
+                                    onSearchClick = {
+                                        viewModel.search()
+                                    },
+                                    onSearchRequestChange = {
+                                        viewModel.setSearchRequest(it)
+                                    },
+                                    focusRequester = searchFieldFocusRequester
                                 )
                             }
                         }
                         itemsIndexed(
                             lazyPagingGifs,
-                            key = { _, gif -> gif.id }
+                            key = { i, gif ->
+                                gif.generatedUniqueId
+                            }
                         ) { i, gif ->
                             if (gif != null) {
                                 GifItem(i, gif, onItemClick)
                             }
                         }
 
-                        when (appendState) {
+                        when (lazyPagingGifs.loadState.append) {
                             is LoadState.Loading -> {
                                 item {
                                     InProgress(
@@ -116,6 +154,7 @@ fun ListOfGifsScreen(
                                     )
                                 }
                             }
+
                             is LoadState.Error -> {
                                 item {
                                     DataFetchingFailed(
@@ -126,6 +165,7 @@ fun ListOfGifsScreen(
                                     )
                                 }
                             }
+
                             else -> {}
                         }
                     }

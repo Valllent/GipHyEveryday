@@ -14,6 +14,13 @@ class GifNetworkDataSource {
         return convertGifResponse(networkGifResponse)
     }
 
+    suspend fun search(request: String, offset: Int): GifPage? {
+        val networkGifResponse = runSafely {
+            NetworkModule.gifsApi.search(request, offset)
+        }
+        return convertGifResponse(networkGifResponse)
+    }
+
 
     private fun convertGifResponse(gifResponse: GifResponse?): GifPage? {
         if (gifResponse == null) return null

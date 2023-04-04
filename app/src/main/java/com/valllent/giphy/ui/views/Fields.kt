@@ -2,14 +2,14 @@ package com.valllent.giphy.ui.views
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
@@ -25,8 +25,11 @@ import com.valllent.giphy.ui.wrappers.PreviewWrapper
 @ExperimentalMaterial3Api
 @Composable
 fun SearchField(
-    request: MutableState<String>,
-    focusRequester: FocusRequester = FocusRequester()
+    request: String,
+    enabled: Boolean,
+    onSearchRequestChange: (String) -> Unit,
+    onSearchClick: () -> Unit,
+    focusRequester: FocusRequester = FocusRequester(),
 ) {
     Surface(
         modifier = Modifier
@@ -39,18 +42,42 @@ fun SearchField(
             )
     ) {
         TextField(
+            value = request,
+            onValueChange = {
+                onSearchRequestChange(it)
+            },
             modifier = Modifier
                 .focusRequester(focusRequester),
-            value = request.value,
-            onValueChange = {
-                request.value = it
-            },
             singleLine = true,
             textStyle = MaterialTheme.typography.titleLarge,
             label = {
                 Text(stringResource(id = R.string.search))
             },
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions {
+                onSearchClick()
+            },
+            trailingIcon = {
+                IconButton(
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .height(40.dp)
+                        .width(40.dp)
+                        .clip(CircleShape),
+                    onClick = {
+                        onSearchClick()
+                    },
+                    enabled = enabled
+                ) {
+                    Icon(
+                        Icons.Default.Search,
+                        stringResource(R.string.search),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(8.dp)
+                    )
+                }
+            }
         )
     }
 }
@@ -60,6 +87,6 @@ fun SearchField(
 @Composable
 private fun PreviewSearchField() {
     PreviewWrapper {
-        SearchField(request = remember { mutableStateOf("Cat") })
+        SearchField(request = "Cat", true, {}, {})
     }
 }

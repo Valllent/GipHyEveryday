@@ -11,6 +11,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,8 +29,9 @@ import com.valllent.giphy.ui.wrappers.ScaffoldWrapper
 @Composable
 fun DetailGifScreen(gifsViewModel: GifsViewModel, selectedGifIndex: Int) {
     ScaffoldWrapper {
-
-        val lazyGifs = gifsViewModel.gifsFlow.collectAsLazyPagingItems()
+        val lazyGifs = gifsViewModel
+            .currentGifsFlow.collectAsState()
+            .value.collectAsLazyPagingItems()
         val appendState = lazyGifs.loadState.append
 
         val addAdditionalItem = appendState !is LoadState.NotLoading
@@ -42,12 +44,12 @@ fun DetailGifScreen(gifsViewModel: GifsViewModel, selectedGifIndex: Int) {
         HorizontalPager(
             itemsCount,
             state = rememberPagerState(selectedGifIndex),
-            key = { i ->
-                val isPlaceholder = addAdditionalItem && i == lazyGifs.itemCount
+            key = {
+                val isPlaceholder = addAdditionalItem && it == lazyGifs.itemCount
                 if (isPlaceholder) {
                     "Placeholder"
                 } else {
-                    lazyGifs.peek(i)?.id ?: ""
+                    lazyGifs.peek(it)?.generatedUniqueId ?: ""
                 }
             }
         ) { i ->

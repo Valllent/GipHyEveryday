@@ -3,10 +3,12 @@ package com.valllent.giphy.ui.dataproviders
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.valllent.giphy.data.Gif
-import com.valllent.giphy.network.GifNetworkDataSource
+import com.valllent.giphy.data.GifPage
 import kotlinx.coroutines.delay
 
-class GifPagingSource : PagingSource<Int, Gif>() {
+class GifPagingSource(
+    private val fetchGifs: suspend (Int) -> GifPage?
+) : PagingSource<Int, Gif>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Gif> {
         val pageNumber = params.key ?: 0
@@ -17,7 +19,7 @@ class GifPagingSource : PagingSource<Int, Gif>() {
             delay(5000)
         }
 
-        val gifPage = GifNetworkDataSource().getTrending(offset * pageNumber)
+        val gifPage = fetchGifs(offset * pageNumber)
         return if (gifPage != null) {
             LoadResult.Page(
                 gifPage.gifs,
