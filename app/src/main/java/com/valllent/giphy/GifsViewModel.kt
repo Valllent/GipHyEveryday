@@ -7,7 +7,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.valllent.giphy.data.Gif
 import com.valllent.giphy.network.GifNetworkDataSource
-import com.valllent.giphy.ui.dataproviders.GifPagingSource
+import com.valllent.giphy.ui.data.providers.GifPagingSource
 import com.valllent.giphy.utils.Constants
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,13 +56,11 @@ class GifsViewModel : BaseViewModel() {
             ).flow.cachedIn(viewModelScope).apply {
                 _currentGifsFlow.value = this
             }
-            _showingSearchResult.value = true
         }
     }
 
     fun closeSearch() {
         _currentGifsFlow.value = trendingGifsFlow
-        _showingSearchResult.value = false
     }
 
 }

@@ -2,12 +2,9 @@
 
 package com.valllent.giphy.ui.screens
 
-import androidx.activity.ComponentActivity
-import androidx.activity.OnBackPressedCallback
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -18,17 +15,15 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import com.valllent.giphy.GifsViewModel
 import com.valllent.giphy.R
 import com.valllent.giphy.data.Gif
-import com.valllent.giphy.ui.preview.GifPreviewData
+import com.valllent.giphy.ui.data.preview.GifPreviewData
 import com.valllent.giphy.ui.theme.ProjectTheme
 import com.valllent.giphy.ui.views.*
 import com.valllent.giphy.ui.wrappers.ScaffoldWrapper
@@ -45,15 +40,16 @@ fun ListOfGifsScreen(
 ) {
     val searchIsActivated = rememberSaveable { mutableStateOf(false) }
     val focusRequestedAlready = rememberSaveable { mutableStateOf(false) }
+    val showingSearchResult = rememberSaveable { mutableStateOf(false) }
+    val mainLazyListState = rememberLazyListState()
+    val searchLazyListState = rememberLazyListState()
+    val searchFieldFocusRequester = remember { FocusRequester() }
+
     val currentGifsFlow = viewModel.currentGifsFlow.collectAsState()
     val lazyPagingGifs = currentGifsFlow.value.collectAsLazyPagingItems()
-    val showingSearchResult = viewModel.showingSearchResult.collectAsState()
-
-    val mainLazyListState = rememberLazyListState()
-    var searchLazyListState = rememberLazyListState()
     val currentLazyListState = if (showingSearchResult.value) searchLazyListState else mainLazyListState
+
     val coroutineScope = rememberCoroutineScope()
-    val searchFieldFocusRequester = remember { FocusRequester() }
 
     LaunchedEffect(searchIsActivated.value) {
         if (searchIsActivated.value) {
@@ -65,8 +61,10 @@ fun ListOfGifsScreen(
             }
             focusRequestedAlready.value = true
         } else {
-            focusRequestedAlready.value = false
             viewModel.closeSearch()
+            showingSearchResult.value = false
+            focusRequestedAlready.value = false
+            searchLazyListState.scrollToItem(0)
         }
     }
 
@@ -90,98 +88,74 @@ fun ListOfGifsScreen(
         }
     ) {
 
-        when (lazyPagingGifs.loadState.refresh) {
-            is LoadState.NotLoading -> {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    LazyColumn(
-                        state = currentLazyListState,
-                    ) {
-                        if (searchIsActivated.value) {
-                            stickyHeader(
-                                key = "Search"
-                            ) {
-                                val backPressedDispatcher =
-                                    (LocalContext.current as ComponentActivity).onBackPressedDispatcher
-                                val backListener = remember {
-                                    object : OnBackPressedCallback(true) {
-                                        override fun handleOnBackPressed() {
-                                            searchIsActivated.value = false
-                                            viewModel.closeSearch()
-                                        }
-                                    }
-                                }
-
-                                DisposableEffect(backPressedDispatcher) {
-                                    backPressedDispatcher.addCallback(backListener)
-                                    onDispose {
-                                        backListener.remove()
-                                    }
-                                }
-
-                                SearchField(
-                                    request = viewModel.searchRequest.collectAsState().value,
-                                    enabled = viewModel.searchRequestIsCorrect.value,
-                                    onSearchClick = {
-                                        viewModel.search()
-                                    },
-                                    onSearchRequestChange = {
-                                        viewModel.setSearchRequest(it)
-                                    },
-                                    focusRequester = searchFieldFocusRequester
-                                )
-                            }
-                        }
-                        itemsIndexed(
-                            lazyPagingGifs,
-                            key = { i, gif ->
-                                gif.generatedUniqueId
-                            }
-                        ) { i, gif ->
-                            if (gif != null) {
-                                GifItem(i, gif, onItemClick)
-                            }
-                        }
-
-                        when (lazyPagingGifs.loadState.append) {
-                            is LoadState.Loading -> {
-                                item {
-                                    InProgress(
-                                        modifier = Modifier
-                                            .height(100.dp),
-                                        fraction = 0.6f
-                                    )
-                                }
-                            }
-
-                            is LoadState.Error -> {
-                                item {
-                                    DataFetchingFailed(
-                                        modifier = Modifier.height(100.dp),
-                                        onRetryClick = {
-                                            lazyPagingGifs.retry()
-                                        }
-                                    )
-                                }
-                            }
-
-                            else -> {}
-                        }
-                    }
-                }
-            }
-
-            is LoadState.Loading -> {
+        LazyListWithEventTracking(
+            flow = currentGifsFlow.value,
+            lazyListState = currentLazyListState,
+            firstLoading = {
                 InProgress(
                     modifier = Modifier.fillMaxSize(),
                 )
+            },
+            firstLoadingFailed = { retry ->
+                DataFetchingFailed(onRetryClick = {
+                    retry()
+                })
+            },
+            loadingNewItems = {
+                InProgress(
+                    modifier = Modifier
+                        .height(100.dp),
+                    fraction = 0.6f
+                )
+            },
+            loadingNewItemsFailed = { retry ->
+                DataFetchingFailed(
+                    modifier = Modifier.height(100.dp),
+                    onRetryClick = {
+                        retry()
+                    }
+                )
+            }
+        ) {
+
+            if (searchIsActivated.value) {
+                stickyHeader(
+                    key = "Search"
+                ) {
+                    BackStackEntryComposable(
+                        onBackPressedListener = {
+                            searchIsActivated.value = false
+                            viewModel.closeSearch()
+                            showingSearchResult.value = false
+                        }
+                    )
+                    SearchField(
+                        request = viewModel.searchRequest.collectAsState().value,
+                        enabled = viewModel.searchRequestIsCorrect.value,
+                        onSearchClick = {
+                            coroutineScope.launch {
+                                searchLazyListState.scrollToItem(0)
+                            }
+                            viewModel.search()
+                            showingSearchResult.value = true
+                        },
+                        onSearchRequestChange = {
+                            viewModel.setSearchRequest(it)
+                        },
+                        focusRequester = searchFieldFocusRequester
+                    )
+                }
             }
 
-            is LoadState.Error -> {
-                DataFetchingFailed(onRetryClick = {
-                    lazyPagingGifs.retry()
-                })
+            itemsIndexed(
+                lazyPagingGifs,
+                key = { i, gif ->
+                    gif.generatedUniqueId
+                }
+            ) { i, gif ->
+                if (gif != null) {
+                    GifItem(i, gif, onItemClick)
+                }
             }
 
         }

@@ -1,4 +1,4 @@
-package com.valllent.giphy.ui.preview
+package com.valllent.giphy.ui.data.preview
 
 import com.valllent.giphy.data.Gif
 

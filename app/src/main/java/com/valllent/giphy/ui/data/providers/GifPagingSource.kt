@@ -1,4 +1,4 @@
-package com.valllent.giphy.ui.dataproviders
+package com.valllent.giphy.ui.data.providers
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
