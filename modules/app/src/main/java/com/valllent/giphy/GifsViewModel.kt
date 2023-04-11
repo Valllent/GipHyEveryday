@@ -18,9 +18,6 @@ class GifsViewModel : BaseViewModel() {
     private val _searchRequest = MutableStateFlow("")
     val searchRequest = _searchRequest.asStateFlow()
 
-    private val _showingSearchResult = MutableStateFlow(false)
-    val showingSearchResult = _showingSearchResult.asStateFlow()
-
     private val _searchRequestIsCorrect = MutableStateFlow(false)
     val searchRequestIsCorrect = _searchRequestIsCorrect.asStateFlow()
 
