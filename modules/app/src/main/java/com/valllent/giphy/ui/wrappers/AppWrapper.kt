@@ -7,7 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.valllent.giphy.GifsViewModel
-import com.valllent.giphy.data.Gif
+import com.valllent.giphy.domain.data.Gif
 import com.valllent.giphy.ui.screens.DetailGifScreen
 import com.valllent.giphy.ui.screens.ListOfGifsScreen
 import com.valllent.giphy.ui.theme.ProjectTheme

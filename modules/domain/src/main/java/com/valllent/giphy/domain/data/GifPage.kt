@@ -1,4 +1,4 @@
-package com.valllent.giphy.data
+package com.valllent.giphy.domain.data
 
 data class GifPage(
     val gifs: List<Gif>,

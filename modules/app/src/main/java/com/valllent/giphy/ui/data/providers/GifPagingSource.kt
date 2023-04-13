@@ -2,8 +2,8 @@ package com.valllent.giphy.ui.data.providers
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.valllent.giphy.data.Gif
-import com.valllent.giphy.data.GifPage
+import com.valllent.giphy.domain.data.Gif
+import com.valllent.giphy.domain.data.GifPage
 import kotlinx.coroutines.delay
 
 class GifPagingSource(

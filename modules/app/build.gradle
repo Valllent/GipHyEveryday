@@ -1,7 +1,8 @@
 plugins {
+    id 'kotlin-kapt'
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-    id "kotlin-kapt"
+    id 'com.google.dagger.hilt.android'
 }
 
 android {
@@ -47,19 +48,16 @@ android {
     }
 }
 
+kapt { // Hilt: allows references to generated code
+    correctErrorTypes true
+}
+
 dependencies {
-    // Basic
-    implementation 'androidx.core:core-ktx:1.9.0'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
+    implementation project(":modules:domain")
+    implementation project(":modules:network")
 
     // Splash screen
     implementation "androidx.core:core-splashscreen:1.0.0"
-
-    // Network
-    implementation "com.squareup.retrofit2:retrofit:2.9.0"
-    implementation "com.squareup.retrofit2:converter-moshi:2.9.0"
-    implementation 'com.squareup.moshi:moshi:1.14.0'
-    kapt "com.squareup.moshi:moshi-kotlin-codegen:1.14.0"
 
     // Image downloader
     implementation "com.github.skydoves:landscapist-glide:2.1.8"
@@ -68,6 +66,10 @@ dependencies {
 
     // Pagination
     implementation "androidx.paging:paging-compose:1.0.0-alpha18"
+
+    // Hilt (Dependency injection)
+    implementation "com.google.dagger:hilt-android:${rootProject.hiltVersion}"
+    kapt "com.google.dagger:hilt-compiler:${rootProject.hiltVersion}"
 
     /* --- Compose Dependencies (new BOM: https://mvnrepository.com/artifact/androidx.compose/compose-bom) --- */
     def composeBom = platform('androidx.compose:compose-bom:2023.03.00')

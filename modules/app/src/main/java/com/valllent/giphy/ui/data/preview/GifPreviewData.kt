@@ -1,6 +1,6 @@
 package com.valllent.giphy.ui.data.preview
 
-import com.valllent.giphy.data.Gif
+import com.valllent.giphy.domain.data.Gif
 
 object GifPreviewData {
 

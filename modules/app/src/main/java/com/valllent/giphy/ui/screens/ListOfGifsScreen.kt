@@ -22,7 +22,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import com.valllent.giphy.GifsViewModel
 import com.valllent.giphy.R
-import com.valllent.giphy.data.Gif
+import com.valllent.giphy.domain.data.Gif
 import com.valllent.giphy.ui.data.preview.GifPreviewData
 import com.valllent.giphy.ui.theme.ProjectTheme
 import com.valllent.giphy.ui.views.*
