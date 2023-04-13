@@ -20,17 +20,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
-import com.valllent.giphy.GifsViewModel
 import com.valllent.giphy.R
 import com.valllent.giphy.domain.data.Gif
+import com.valllent.giphy.ui.OnGifClick
 import com.valllent.giphy.ui.data.preview.GifPreviewData
 import com.valllent.giphy.ui.theme.ProjectTheme
+import com.valllent.giphy.ui.viewmodels.GifsViewModel
 import com.valllent.giphy.ui.views.*
 import com.valllent.giphy.ui.wrappers.ScaffoldWrapper
 import kotlinx.coroutines.launch
-
-
-typealias OnGifClick = (Int, Gif) -> Unit
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable

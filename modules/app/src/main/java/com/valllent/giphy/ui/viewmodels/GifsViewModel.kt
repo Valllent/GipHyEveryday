@@ -1,4 +1,4 @@
-package com.valllent.giphy
+package com.valllent.giphy.ui.viewmodels
 
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager

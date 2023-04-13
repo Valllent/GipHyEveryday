@@ -17,3 +17,4 @@ rootProject.name = "Giphy"
 include ':modules:app'
 include ':modules:domain'
 include ':modules:network'
+include ':modules:database'

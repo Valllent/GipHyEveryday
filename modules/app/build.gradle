@@ -55,6 +55,7 @@ kapt { // Hilt: allows references to generated code
 dependencies {
     implementation project(":modules:domain")
     implementation project(":modules:network")
+    implementation project(":modules:database")
 
     // Splash screen
     implementation "androidx.core:core-splashscreen:1.0.0"

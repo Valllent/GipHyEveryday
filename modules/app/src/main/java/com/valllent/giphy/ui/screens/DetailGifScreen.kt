@@ -13,9 +13,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.valllent.giphy.GifsViewModel
 import com.valllent.giphy.domain.data.Gif
 import com.valllent.giphy.ui.data.preview.GifPreviewData
+import com.valllent.giphy.ui.viewmodels.GifsViewModel
 import com.valllent.giphy.ui.views.*
 import com.valllent.giphy.ui.wrappers.PreviewWrapper
 import com.valllent.giphy.ui.wrappers.ScaffoldWrapper
