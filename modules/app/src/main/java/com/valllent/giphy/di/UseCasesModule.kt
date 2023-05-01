@@ -15,13 +15,16 @@ import dagger.hilt.android.components.ViewModelComponent
 class UseCasesModule {
 
     @Provides
-    fun provideGetTrendingGifs(gifsRepository: GifsRepository): GetTrendingGifs {
-        return GetTrendingGifs(gifsRepository)
+    fun provideGetTrendingGifs(
+        gifsRepository: GifsRepository,
+        savedGifsRepository: SavedGifsRepository
+    ): GetTrendingGifs {
+        return GetTrendingGifs(gifsRepository, savedGifsRepository)
     }
 
     @Provides
-    fun provideSearchGifs(gifsRepository: GifsRepository): SearchGifs {
-        return SearchGifs(gifsRepository)
+    fun provideSearchGifs(gifsRepository: GifsRepository, savedGifsRepository: SavedGifsRepository): SearchGifs {
+        return SearchGifs(gifsRepository, savedGifsRepository)
     }
 
     @Provides

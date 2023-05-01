@@ -25,12 +25,13 @@ import com.valllent.giphy.ui.wrappers.PreviewWrapper
 fun ProjectIconButton(
     imageVector: ImageVector,
     contentDescription: String,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
     val shape = CircleShape
 
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .padding(4.dp)
             .clip(shape)
             .border(

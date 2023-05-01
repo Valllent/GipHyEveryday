@@ -6,8 +6,8 @@ class ChangeSavedStateForGif(
     private val savedGifsRepository: SavedGifsRepository
 ) {
 
-    suspend operator fun invoke(id: String) {
-        savedGifsRepository.changeSavedStateForGif(id)
+    suspend operator fun invoke(id: String): Boolean {
+        return savedGifsRepository.changeSavedStateForGif(id)
     }
 
 }

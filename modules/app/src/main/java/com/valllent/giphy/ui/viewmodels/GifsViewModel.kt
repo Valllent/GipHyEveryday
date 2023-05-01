@@ -6,6 +6,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.valllent.giphy.domain.data.Gif
+import com.valllent.giphy.domain.usecases.ChangeSavedStateForGif
 import com.valllent.giphy.domain.usecases.GetTrendingGifs
 import com.valllent.giphy.domain.usecases.SearchGifs
 import com.valllent.giphy.ui.data.providers.GifPagingSource
@@ -20,6 +21,7 @@ import javax.inject.Inject
 class GifsViewModel @Inject constructor(
     private val getTrendingGifs: GetTrendingGifs,
     private val searchGifs: SearchGifs,
+    private val changeSavedStateForGif: ChangeSavedStateForGif,
 ) : BaseViewModel() {
 
     private val _searchRequest = MutableStateFlow("")
@@ -42,6 +44,11 @@ class GifsViewModel @Inject constructor(
     private val _currentGifsFlow = MutableStateFlow(trendingGifsFlow)
     val currentGifsFlow = _currentGifsFlow.asStateFlow()
 
+    suspend fun changeSavedState(gif: Gif): Boolean {
+        val currentState = changeSavedStateForGif(gif.id)
+        gif.isSaved = currentState
+        return currentState
+    }
 
     fun setSearchRequest(request: String) {
         val requestIsCorrect = request.isNotBlank()

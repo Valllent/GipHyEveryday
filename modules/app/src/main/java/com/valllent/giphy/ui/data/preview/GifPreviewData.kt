@@ -24,7 +24,9 @@ object GifPreviewData {
             thumbnailUrl = "https://thumbnail-url.com/gif2",
             postedBy = "Username2",
             postedDatetime = "1970-01-01 00:00:00"
-        ),
+        ).apply {
+            isSaved = true
+        },
         Gif(
             id = "id3",
             title = "Excepteur sint",

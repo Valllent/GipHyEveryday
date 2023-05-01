@@ -12,5 +12,6 @@ data class Gif(
     val thumbnailUrl: String,
     val postedBy: String,
     val postedDatetime: String,
-    val generatedUniqueId: String = UUID.randomUUID().toString()
+    val generatedUniqueId: String = UUID.randomUUID().toString(),
+    var isSaved: Boolean = false
 )
