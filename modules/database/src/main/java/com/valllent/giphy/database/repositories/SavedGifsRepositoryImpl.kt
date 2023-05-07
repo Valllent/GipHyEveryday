@@ -9,6 +9,13 @@ class SavedGifsRepositoryImpl(
     private val savedGifDao: SavedGifDao
 ) : SavedGifsRepository {
 
+    override suspend fun getSavedGifIds(offset: Int, count: Int): List<String> {
+        return withContext(Dispatchers.IO) {
+            val savedGifs = savedGifDao.getSavedGifs(offset, count)
+            savedGifs?.map { it.id } ?: emptyList()
+        }
+    }
+
     override suspend fun isGifSaved(id: String): Boolean {
         return withContext(Dispatchers.IO) {
             savedGifDao.getSavedGif(id) != null

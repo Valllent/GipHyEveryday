@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.valllent.giphy.ui.Retry
+import com.valllent.giphy.ui.utils.Retry
 import kotlinx.coroutines.flow.Flow
 
 @Composable

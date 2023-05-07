@@ -2,12 +2,15 @@
 
 package com.valllent.giphy.ui.wrappers
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.valllent.giphy.ui.GlobalListeners
 import com.valllent.giphy.ui.views.ProjectNavigationDrawer
 import com.valllent.giphy.ui.views.ProjectTopAppBar
 import kotlinx.coroutines.launch
@@ -16,12 +19,13 @@ import kotlinx.coroutines.launch
 fun ScaffoldWrapper(
     topAppBarActions: @Composable RowScope.() -> Unit = {},
     onTopAppBarLogoClick: () -> Unit = {},
+    globalListeners: GlobalListeners,
     content: @Composable () -> Unit
 ) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    ProjectNavigationDrawer(drawerState) {
+    ProjectNavigationDrawer(drawerState, globalListeners) {
         Scaffold(
             content = { paddingValues ->
                 Box(
@@ -55,7 +59,7 @@ fun ScaffoldWrapper(
 @Preview
 private fun PreviewScreenWrapper() {
     PreviewWrapper {
-        ScaffoldWrapper {
+        ScaffoldWrapper(globalListeners = GlobalListeners({}, { TODO() })) {
 
         }
     }

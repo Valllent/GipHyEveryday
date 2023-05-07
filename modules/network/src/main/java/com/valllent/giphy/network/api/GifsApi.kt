@@ -6,6 +6,11 @@ import retrofit2.http.Query
 
 interface GifsApi {
 
+    @GET("/v1/gifs?rating=r")
+    suspend fun getGifsByIds(
+        @Query("ids") ids: String
+    ): GifResponse
+
     @GET("/v1/gifs/trending?rating=r")
     suspend fun getTrendingGifs(
         @Query("offset") offset: Int,

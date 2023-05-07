@@ -3,6 +3,7 @@ package com.valllent.giphy.di
 import com.valllent.giphy.domain.repositories.GifsRepository
 import com.valllent.giphy.domain.repositories.SavedGifsRepository
 import com.valllent.giphy.domain.usecases.ChangeSavedStateForGif
+import com.valllent.giphy.domain.usecases.GetSavedGifs
 import com.valllent.giphy.domain.usecases.GetTrendingGifs
 import com.valllent.giphy.domain.usecases.SearchGifs
 import dagger.Module
@@ -30,6 +31,11 @@ class UseCasesModule {
     @Provides
     fun provideChangeSavedStateForGif(savedGifsRepository: SavedGifsRepository): ChangeSavedStateForGif {
         return ChangeSavedStateForGif(savedGifsRepository)
+    }
+
+    @Provides
+    fun provideGetSavedGifs(gifsRepository: GifsRepository, savedGifsRepository: SavedGifsRepository): GetSavedGifs {
+        return GetSavedGifs(gifsRepository, savedGifsRepository)
     }
 
 }
