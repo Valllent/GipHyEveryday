@@ -11,11 +11,11 @@ enum class DrawerItem(
 
     TRENDING(
         R.string.trending,
-        Screen.ListOfGifs(),
+        Screen.ListOfGifs.staticRoute,
     ),
     SAVED(
         R.string.saved,
-        Screen.ListOfSavedGifs()
+        Screen.ListOfSavedGifs.staticRoute
     ),
     SETTINGS(
         R.string.settings,
