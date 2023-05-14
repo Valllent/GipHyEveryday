@@ -6,7 +6,6 @@ import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -116,7 +115,7 @@ fun AppGraphHolder() {
         )
 
         NavHost(navController, startDestination = Screen.ListOfGifs.staticRoute) {
-            createScreen(Screen.ListOfGifs.staticRoute) {
+            composable(Screen.ListOfGifs.staticRoute) {
                 Screen.ListOfGifs.Content(
                     onItemClick = { index, gif ->
                         navController.navigate(Screen.DetailGif.createRoute(index))
@@ -125,43 +124,36 @@ fun AppGraphHolder() {
                 )
             }
 
-            createScreen(Screen.DetailGif.staticRoute) {
+            composable(Screen.DetailGif.staticRoute) {
                 Screen.DetailGif.Content(it, navController, globalListeners)
             }
 
-            createScreen(Screen.ListOfSavedGifs.staticRoute) {
+            composable(Screen.ListOfSavedGifs.staticRoute) {
                 Screen.ListOfSavedGifs.Content(
                     onItemClick = { index, gif ->
-                        navController.navigate(Screen.DetailGif.createRoute(index))
+                        navController.navigate(Screen.DetailSavedGif.createRoute(index))
                     },
                     globalListeners
                 )
             }
 
-            createScreen(Screen.DetailSavedGif.staticRoute) {
+            composable(Screen.DetailSavedGif.staticRoute) {
                 Screen.DetailSavedGif.Content(it, navController, globalListeners)
             }
         }
     }
 }
 
-private fun NavGraphBuilder.createScreen(staticRoute: String, content: @Composable (NavBackStackEntry) -> Unit) {
-    composable(staticRoute) {
-        content(it)
-    }
-}
-
 private fun createOnDrawerItemSelectedListener(navController: NavHostController): OnDrawerItemSelected {
     return { selectedDrawerItem ->
-        val currentRoute = checkNotNull(navController.currentBackStackEntry?.destination?.route)
 
         when (selectedDrawerItem) {
-            DrawerItem.SAVED -> {
-                navigateToRouteFromDrawer(currentRoute, Screen.ListOfSavedGifs.createRoute(), navController)
+            DrawerItem.TRENDING -> {
+                navigateToExistingRouteOtherwiseCreateNewOne(Screen.ListOfGifs.createRoute(), navController)
             }
 
-            DrawerItem.TRENDING -> {
-                navigateToRouteFromDrawer(currentRoute, Screen.ListOfGifs.createRoute(), navController)
+            DrawerItem.SAVED -> {
+                navigateToExistingRouteOtherwiseCreateNewOne(Screen.ListOfSavedGifs.createRoute(), navController)
             }
 
             DrawerItem.SETTINGS -> {
@@ -173,11 +165,20 @@ private fun createOnDrawerItemSelectedListener(navController: NavHostController)
     }
 }
 
-private fun navigateToRouteFromDrawer(currentRoute: String, destinationRoute: String, navController: NavController) {
-    if (currentRoute != destinationRoute) {
-        val fragmentWasNotOpenedBefore = !navController.popBackStack(destinationRoute, false)
-        if (fragmentWasNotOpenedBefore) {
-            navController.navigate(destinationRoute)
-        }
+private fun navigateToExistingRouteOtherwiseCreateNewOne(
+    destinationRoute: String,
+    navController: NavController
+) {
+    val currentRoute = navController.currentDestination?.route
+    if (currentRoute == destinationRoute) return
+
+    val theSameDestinationInBackStack = navController.backQueue
+        .map { it.destination }
+        .firstOrNull { it.route == destinationRoute }
+
+    if (theSameDestinationInBackStack != null) {
+        navController.popBackStack(destinationRoute, false)
+    } else {
+        navController.navigate(destinationRoute)
     }
 }
