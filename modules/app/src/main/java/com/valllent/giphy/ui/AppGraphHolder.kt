@@ -29,7 +29,7 @@ sealed class Screen(
         const val DETAIL_SCREEN_ARGUMENT_GIF_INDEX = "gifIndex"
     }
 
-    object ListOfGifs : Screen("list/gif") {
+    object ListOfGifs : Screen("gifs/trending") {
 
         fun createRoute() = staticRoute
 
@@ -41,7 +41,7 @@ sealed class Screen(
 
     }
 
-    object ListOfSavedGifs : Screen("list/savedGif") {
+    object ListOfSavedGifs : Screen("gifs/saved") {
 
         fun createRoute() = staticRoute
 
@@ -53,9 +53,9 @@ sealed class Screen(
 
     }
 
-    object DetailGif : Screen("gif/{$DETAIL_SCREEN_ARGUMENT_GIF_INDEX}") {
+    object DetailGif : Screen("gifs/trending/{$DETAIL_SCREEN_ARGUMENT_GIF_INDEX}") {
 
-        fun createRoute(gifIndex: Int) = "gif/$gifIndex"
+        fun createRoute(gifIndex: Int) = "gifs/trending/$gifIndex"
 
         @Composable
         fun Content(
@@ -75,9 +75,9 @@ sealed class Screen(
 
     }
 
-    object DetailSavedGif : Screen("savedGif/{$DETAIL_SCREEN_ARGUMENT_GIF_INDEX}") {
+    object DetailSavedGif : Screen("gifs/saved/{$DETAIL_SCREEN_ARGUMENT_GIF_INDEX}") {
 
-        fun createRoute(gifIndex: Int) = "savedGif/$gifIndex"
+        fun createRoute(gifIndex: Int) = "gifs/saved/$gifIndex"
 
         @Composable
         fun Content(
