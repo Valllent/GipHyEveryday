@@ -10,16 +10,17 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.valllent.giphy.app.presentation.data.view.DrawerItem
+import com.valllent.giphy.app.presentation.data.view.DrawerItemUiModel
+import com.valllent.giphy.app.presentation.data.view.GifUiModel
 import com.valllent.giphy.app.presentation.ui.screens.DetailGifScreen
-import com.valllent.giphy.app.presentation.ui.screens.ListOfGifsScreen
 import com.valllent.giphy.app.presentation.ui.screens.ListOfSavedGifsScreen
+import com.valllent.giphy.app.presentation.ui.screens.trending.TrendingScreen
+import com.valllent.giphy.app.presentation.ui.screens.trending.TrendingScreenActions
+import com.valllent.giphy.app.presentation.ui.screens.trending.TrendingViewModel
 import com.valllent.giphy.app.presentation.ui.theme.ProjectTheme
 import com.valllent.giphy.app.presentation.ui.utils.GetNavigationController
 import com.valllent.giphy.app.presentation.ui.utils.OnDrawerItemSelected
-import com.valllent.giphy.app.presentation.ui.viewmodels.GifsViewModel
 import com.valllent.giphy.app.presentation.ui.viewmodels.SavedGifsViewModel
-import com.valllent.giphy.domain.data.Gif
 
 sealed class Screen(
     val staticRoute: String
@@ -34,9 +35,33 @@ sealed class Screen(
         fun createRoute() = staticRoute
 
         @Composable
-        fun Content(onItemClick: (Int, Gif) -> Unit, globalListeners: GlobalListeners) {
-            val viewModel = hiltViewModel<GifsViewModel>()
-            ListOfGifsScreen(viewModel, onItemClick, globalListeners)
+        fun Content(onItemClick: (Int, GifUiModel) -> Unit, globalListeners: GlobalListeners) {
+            val viewModel = hiltViewModel<TrendingViewModel>()
+            val state = viewModel.state.value
+            val actions = TrendingScreenActions(
+                onGifClick = { i, gif ->
+                    onItemClick(i, gif)
+                },
+                onOpenSearch = {
+                    viewModel.showSearchField()
+                },
+                onCloseSearch = {
+                    viewModel.hideSearchField()
+                },
+                onSearchRequestChange = {
+                    viewModel.setSearchRequest(it)
+                },
+                onSearchClick = {
+                    viewModel.search()
+                },
+                onChangeSavedStateForGif = {
+                    viewModel.changeSavedState(it)
+                },
+                onSearchFieldFocusRequested = {
+                    viewModel.searchFieldFocusRequested()
+                }
+            )
+            TrendingScreen(state, actions, globalListeners)
         }
 
     }
@@ -46,7 +71,7 @@ sealed class Screen(
         fun createRoute() = staticRoute
 
         @Composable
-        fun Content(onItemClick: (Int, Gif) -> Unit, globalListeners: GlobalListeners) {
+        fun Content(onItemClick: (Int, GifUiModel) -> Unit, globalListeners: GlobalListeners) {
             val viewModel = hiltViewModel<SavedGifsViewModel>()
             ListOfSavedGifsScreen(viewModel, onItemClick, globalListeners)
         }
@@ -67,9 +92,9 @@ sealed class Screen(
                 navBackStackEntry.arguments?.getString(DETAIL_SCREEN_ARGUMENT_GIF_INDEX)?.toIntOrNull() ?: 0
 
             val backStackEntry = remember { checkNotNull(navController.previousBackStackEntry) }
-            val viewModel = hiltViewModel<GifsViewModel>(backStackEntry)
+            val viewModel = hiltViewModel<TrendingViewModel>(backStackEntry)
 
-            val flow = viewModel.currentGifsFlow.collectAsState().value
+            val flow = viewModel.state.value.currentGifsFlow
             DetailGifScreen(flow, selectedGifIndex, globalListeners)
         }
 
@@ -148,19 +173,19 @@ private fun createOnDrawerItemSelectedListener(navController: NavHostController)
     return { selectedDrawerItem ->
 
         when (selectedDrawerItem) {
-            DrawerItem.TRENDING -> {
+            DrawerItemUiModel.TRENDING -> {
                 navigateToExistingRouteOtherwiseCreateNewOne(Screen.ListOfGifs.createRoute(), navController)
             }
 
-            DrawerItem.SAVED -> {
+            DrawerItemUiModel.SAVED -> {
                 navigateToExistingRouteOtherwiseCreateNewOne(Screen.ListOfSavedGifs.createRoute(), navController)
             }
 
-            DrawerItem.SETTINGS -> {
+            DrawerItemUiModel.SETTINGS -> {
                 TODO()
             }
 
-            DrawerItem.SEPARATOR -> {}
+            DrawerItemUiModel.SEPARATOR -> {}
         }
     }
 }

@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.valllent.giphy.app.presentation.data.view.DrawerItem
+import com.valllent.giphy.app.presentation.data.view.DrawerItemUiModel
 import com.valllent.giphy.app.presentation.ui.GlobalListeners
 import com.valllent.giphy.app.presentation.ui.wrappers.PreviewWrapper
 import kotlinx.coroutines.launch
@@ -36,8 +36,8 @@ fun ProjectNavigationDrawer(
                 Column {
                     Logo(modifier = Modifier.align(Alignment.CenterHorizontally))
 
-                    DrawerItem.getInOrder().forEachIndexed { i, drawerItem ->
-                        if (drawerItem == DrawerItem.SEPARATOR) {
+                    DrawerItemUiModel.getInOrder().forEachIndexed { i, drawerItem ->
+                        if (drawerItem == DrawerItemUiModel.SEPARATOR) {
                             Divider(
                                 modifier = Modifier.padding(
                                     horizontal = 16.dp,

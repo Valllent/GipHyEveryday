@@ -2,7 +2,7 @@ package com.valllent.giphy.domain.repositories
 
 import com.valllent.giphy.domain.data.GifPage
 
-interface GifsRepository {
+interface GifsNetworkRepository {
 
     suspend fun getGifsByIds(
         ids: List<String>

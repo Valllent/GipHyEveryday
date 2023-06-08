@@ -7,7 +7,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,13 +20,13 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import com.valllent.giphy.R
 import com.valllent.giphy.app.presentation.data.preview.GifPreviewData
+import com.valllent.giphy.app.presentation.data.view.GifUiModel
 import com.valllent.giphy.app.presentation.ui.GlobalListeners
 import com.valllent.giphy.app.presentation.ui.theme.ProjectTheme
 import com.valllent.giphy.app.presentation.ui.utils.OnGifClick
 import com.valllent.giphy.app.presentation.ui.viewmodels.SavedGifsViewModel
 import com.valllent.giphy.app.presentation.ui.views.*
 import com.valllent.giphy.app.presentation.ui.wrappers.ScaffoldWrapper
-import com.valllent.giphy.domain.data.Gif
 import kotlinx.coroutines.launch
 
 @Composable
@@ -81,14 +83,14 @@ fun ListOfSavedGifsScreen(
             itemsIndexed(
                 lazyPagingGifs,
                 key = { i, gif ->
-                    gif.generatedUniqueId
+                    gif.uniqueId
                 }
             ) { i, gif ->
                 if (gif != null) {
                     GifItem(
                         i,
                         gif,
-                        onSaveClick = { viewModel.changeSavedState(gif) },
+                        onSaveClick = { viewModel.changeSavedState(gif.id) },
                         onItemClick = onItemClick
                     )
                 }
@@ -102,7 +104,7 @@ fun ListOfSavedGifsScreen(
 @Composable
 private fun GifItem(
     index: Int,
-    gif: Gif,
+    gif: GifUiModel,
     onSaveClick: suspend () -> Boolean,
     onItemClick: OnGifClick,
 ) {
@@ -134,14 +136,14 @@ private fun GifItem(
                 }
             )
 
-            val isSavedState = remember { mutableStateOf(gif.isSaved) }
             ProjectIconButton(
-                if (isSavedState.value) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                if (gif.isSaved.value) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                 stringResource(R.string.save_gif),
                 onClick = {
                     coroutineScope.launch {
+                        TODO()
                         val newValue = onSaveClick()
-                        isSavedState.value = newValue
+                        gif.changeSavedState(newValue)
                     }
                 },
                 modifier = Modifier

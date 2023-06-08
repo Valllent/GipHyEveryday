@@ -1,7 +1,5 @@
 package com.valllent.giphy.domain.data
 
-import java.util.*
-
 data class Gif(
     val id: String,
     val title: String,
@@ -12,6 +10,5 @@ data class Gif(
     val thumbnailUrl: String,
     val postedBy: String,
     val postedDatetime: String,
-    val generatedUniqueId: String = UUID.randomUUID().toString(),
-    var isSaved: Boolean = false
+    val isSaved: Boolean = false
 )

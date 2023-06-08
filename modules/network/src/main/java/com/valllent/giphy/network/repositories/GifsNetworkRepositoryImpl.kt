@@ -1,14 +1,14 @@
 package com.valllent.giphy.network.repositories
 
 import com.valllent.giphy.domain.data.GifPage
-import com.valllent.giphy.domain.repositories.GifsRepository
+import com.valllent.giphy.domain.repositories.GifsNetworkRepository
 import com.valllent.giphy.network.api.GifsApi
 import com.valllent.giphy.network.converters.GifConverter
 import com.valllent.giphy.network.utils.CoroutineExtensions
 
-class GifsRepositoryImpl(
+class GifsNetworkRepositoryImpl(
     private val gifsApi: GifsApi
-) : GifsRepository {
+) : GifsNetworkRepository {
 
     override suspend fun getGifsByIds(ids: List<String>): GifPage? {
         val networkGifResponse = CoroutineExtensions.runSafely {

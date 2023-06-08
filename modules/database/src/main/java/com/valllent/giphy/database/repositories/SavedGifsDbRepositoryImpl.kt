@@ -1,13 +1,13 @@
 package com.valllent.giphy.database.repositories
 
 import com.valllent.giphy.database.daos.SavedGifDao
-import com.valllent.giphy.domain.repositories.SavedGifsRepository
+import com.valllent.giphy.domain.repositories.SavedGifsDbRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class SavedGifsRepositoryImpl(
+class SavedGifsDbRepositoryImpl(
     private val savedGifDao: SavedGifDao
-) : SavedGifsRepository {
+) : SavedGifsDbRepository {
 
     override suspend fun getSavedGifIds(offset: Int, count: Int): List<String> {
         return withContext(Dispatchers.IO) {

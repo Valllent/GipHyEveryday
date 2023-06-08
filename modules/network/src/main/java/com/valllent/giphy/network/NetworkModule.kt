@@ -1,8 +1,8 @@
 package com.valllent.giphy.network
 
-import com.valllent.giphy.domain.repositories.GifsRepository
+import com.valllent.giphy.domain.repositories.GifsNetworkRepository
 import com.valllent.giphy.network.api.GifsApi
-import com.valllent.giphy.network.repositories.GifsRepositoryImpl
+import com.valllent.giphy.network.repositories.GifsNetworkRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,8 +22,8 @@ class NetworkModule {
     }
 
     @Provides
-    fun provideGifsRepository(gifsApi: GifsApi): GifsRepository {
-        return GifsRepositoryImpl(gifsApi)
+    fun provideGifsRepository(gifsApi: GifsApi): GifsNetworkRepository {
+        return GifsNetworkRepositoryImpl(gifsApi)
     }
 
     @Provides

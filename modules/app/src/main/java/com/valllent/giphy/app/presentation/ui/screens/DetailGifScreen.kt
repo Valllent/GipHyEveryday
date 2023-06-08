@@ -14,15 +14,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.PagingData
 import com.valllent.giphy.app.presentation.data.preview.GifPreviewData
+import com.valllent.giphy.app.presentation.data.view.GifUiModel
 import com.valllent.giphy.app.presentation.ui.GlobalListeners
 import com.valllent.giphy.app.presentation.ui.views.*
 import com.valllent.giphy.app.presentation.ui.wrappers.PreviewWrapper
 import com.valllent.giphy.app.presentation.ui.wrappers.ScaffoldWrapper
-import com.valllent.giphy.domain.data.Gif
 import kotlinx.coroutines.flow.Flow
 
 @Composable
-fun DetailGifScreen(flow: Flow<PagingData<Gif>>, selectedGifIndex: Int, globalListeners: GlobalListeners) {
+fun DetailGifScreen(flow: Flow<PagingData<GifUiModel>>, selectedGifIndex: Int, globalListeners: GlobalListeners) {
     ScaffoldWrapper(
         globalListeners = globalListeners
     ) {
@@ -30,7 +30,7 @@ fun DetailGifScreen(flow: Flow<PagingData<Gif>>, selectedGifIndex: Int, globalLi
             flow = flow,
             currentItemIndex = selectedGifIndex,
             getKey = {
-                it.generatedUniqueId
+                it.uniqueId
             },
             item = {
                 DetailGif(it)
@@ -50,7 +50,7 @@ fun DetailGifScreen(flow: Flow<PagingData<Gif>>, selectedGifIndex: Int, globalLi
 }
 
 @Composable
-private fun DetailGif(gif: Gif) {
+private fun DetailGif(gif: GifUiModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()

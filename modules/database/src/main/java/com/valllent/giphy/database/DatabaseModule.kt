@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import com.valllent.giphy.database.daos.SavedGifDao
 import com.valllent.giphy.database.databases.GiphyDatabase
-import com.valllent.giphy.database.repositories.SavedGifsRepositoryImpl
-import com.valllent.giphy.domain.repositories.SavedGifsRepository
+import com.valllent.giphy.database.repositories.SavedGifsDbRepositoryImpl
+import com.valllent.giphy.domain.repositories.SavedGifsDbRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,8 +21,8 @@ class DatabaseModule {
     }
 
     @Provides
-    fun provideSavedGifsRepository(savedGifDao: SavedGifDao): SavedGifsRepository {
-        return SavedGifsRepositoryImpl(savedGifDao)
+    fun provideSavedGifsRepository(savedGifDao: SavedGifDao): SavedGifsDbRepository {
+        return SavedGifsDbRepositoryImpl(savedGifDao)
     }
 
     @Provides

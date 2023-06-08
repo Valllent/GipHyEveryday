@@ -1,11 +1,11 @@
 package com.valllent.giphy.app.di
 
-import com.valllent.giphy.domain.repositories.GifsRepository
-import com.valllent.giphy.domain.repositories.SavedGifsRepository
-import com.valllent.giphy.domain.usecases.ChangeSavedStateForGif
-import com.valllent.giphy.domain.usecases.GetSavedGifs
-import com.valllent.giphy.domain.usecases.GetTrendingGifs
-import com.valllent.giphy.domain.usecases.SearchGifs
+import com.valllent.giphy.domain.repositories.GifsNetworkRepository
+import com.valllent.giphy.domain.repositories.SavedGifsDbRepository
+import com.valllent.giphy.domain.usecases.ChangeSavedStateForGifUseCase
+import com.valllent.giphy.domain.usecases.GetSavedGifsUseCase
+import com.valllent.giphy.domain.usecases.GetTrendingGifsUseCase
+import com.valllent.giphy.domain.usecases.SearchGifsUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,25 +17,31 @@ class UseCasesModule {
 
     @Provides
     fun provideGetTrendingGifs(
-        gifsRepository: GifsRepository,
-        savedGifsRepository: SavedGifsRepository
-    ): GetTrendingGifs {
-        return GetTrendingGifs(gifsRepository, savedGifsRepository)
+        gifsRepository: GifsNetworkRepository,
+        savedGifsRepository: SavedGifsDbRepository
+    ): GetTrendingGifsUseCase {
+        return GetTrendingGifsUseCase(gifsRepository, savedGifsRepository)
     }
 
     @Provides
-    fun provideSearchGifs(gifsRepository: GifsRepository, savedGifsRepository: SavedGifsRepository): SearchGifs {
-        return SearchGifs(gifsRepository, savedGifsRepository)
+    fun provideSearchGifs(
+        gifsRepository: GifsNetworkRepository,
+        savedGifsRepository: SavedGifsDbRepository
+    ): SearchGifsUseCase {
+        return SearchGifsUseCase(gifsRepository, savedGifsRepository)
     }
 
     @Provides
-    fun provideChangeSavedStateForGif(savedGifsRepository: SavedGifsRepository): ChangeSavedStateForGif {
-        return ChangeSavedStateForGif(savedGifsRepository)
+    fun provideChangeSavedStateForGif(savedGifsRepository: SavedGifsDbRepository): ChangeSavedStateForGifUseCase {
+        return ChangeSavedStateForGifUseCase(savedGifsRepository)
     }
 
     @Provides
-    fun provideGetSavedGifs(gifsRepository: GifsRepository, savedGifsRepository: SavedGifsRepository): GetSavedGifs {
-        return GetSavedGifs(gifsRepository, savedGifsRepository)
+    fun provideGetSavedGifs(
+        gifsRepository: GifsNetworkRepository,
+        savedGifsRepository: SavedGifsDbRepository
+    ): GetSavedGifsUseCase {
+        return GetSavedGifsUseCase(gifsRepository, savedGifsRepository)
     }
 
 }

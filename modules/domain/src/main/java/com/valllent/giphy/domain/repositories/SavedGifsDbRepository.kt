@@ -1,7 +1,7 @@
 package com.valllent.giphy.domain.repositories
 
 
-interface SavedGifsRepository {
+interface SavedGifsDbRepository {
 
     suspend fun getSavedGifIds(
         offset: Int,

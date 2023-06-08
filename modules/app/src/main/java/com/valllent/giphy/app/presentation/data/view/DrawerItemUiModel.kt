@@ -4,7 +4,7 @@ import androidx.annotation.StringRes
 import com.valllent.giphy.R
 import com.valllent.giphy.app.presentation.ui.Screen
 
-enum class DrawerItem(
+enum class DrawerItemUiModel(
     @StringRes val titleResId: Int,
     val screenRoute: String?
 ) {

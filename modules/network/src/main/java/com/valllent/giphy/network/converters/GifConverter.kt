@@ -9,7 +9,7 @@ object GifConverter {
         if (gifResponse == null) return null
 
         val responseGifsList = gifResponse.gifsList
-            ?: return GifPage(emptyList(), hasNextPage = false, fromNetwork = true)
+            ?: return GifPage(emptyList(), hasNextPage = false)
 
         val gifs = ArrayList<com.valllent.giphy.domain.data.Gif>(responseGifsList.size)
         responseGifsList.forEach { responseGif ->
@@ -35,7 +35,6 @@ object GifConverter {
         return GifPage(
             gifs = gifs,
             hasNextPage = hasNextPage,
-            fromNetwork = true,
         )
     }
 

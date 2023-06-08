@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.valllent.giphy.app.presentation.ui.screens
+package com.valllent.giphy.app.presentation.ui.screens.trending
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -13,8 +13,10 @@ import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.stringResource
@@ -26,62 +28,55 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import com.valllent.giphy.R
 import com.valllent.giphy.app.presentation.data.preview.GifPreviewData
+import com.valllent.giphy.app.presentation.data.view.GifUiModel
 import com.valllent.giphy.app.presentation.ui.GlobalListeners
 import com.valllent.giphy.app.presentation.ui.theme.ProjectTheme
 import com.valllent.giphy.app.presentation.ui.utils.OnGifClick
-import com.valllent.giphy.app.presentation.ui.viewmodels.GifsViewModel
 import com.valllent.giphy.app.presentation.ui.views.*
 import com.valllent.giphy.app.presentation.ui.wrappers.ScaffoldWrapper
-import com.valllent.giphy.domain.data.Gif
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun ListOfGifsScreen(
-    viewModel: GifsViewModel,
-    onItemClick: OnGifClick,
+fun TrendingScreen(
+    state: TrendingScreenState,
+    actions: TrendingScreenActions,
     globalListeners: GlobalListeners,
 ) {
-    val searchIsActivated = rememberSaveable { mutableStateOf(false) }
-    val focusRequestedAlready = rememberSaveable { mutableStateOf(false) }
-    val showingSearchResult = rememberSaveable { mutableStateOf(false) }
     val mainLazyListState = rememberLazyListState()
     val searchLazyListState = rememberLazyListState()
     val searchFieldFocusRequester = remember { FocusRequester() }
 
-    val currentGifsFlow = viewModel.currentGifsFlow.collectAsState()
-    val lazyPagingGifs = currentGifsFlow.value.collectAsLazyPagingItems()
-    val currentLazyListState = if (showingSearchResult.value) searchLazyListState else mainLazyListState
+    val currentLazyListState = if (state.showSearchResultList) searchLazyListState else mainLazyListState
 
     val coroutineScope = rememberCoroutineScope()
+    val lazyPagingGifs = state.currentGifsFlow.collectAsLazyPagingItems()
 
-    LaunchedEffect(searchIsActivated.value) {
-        if (searchIsActivated.value) {
-            if (focusRequestedAlready.value.not()) {
+    LaunchedEffect(state.showSearchField) {
+        if (state.showSearchField) {
+            if (state.searchFieldFocusRequestedAlready.not()) {
                 if (currentLazyListState.firstVisibleItemIndex in 0..5) {
                     currentLazyListState.animateScrollToItem(0)
                 }
                 searchFieldFocusRequester.requestFocus()
             }
-            focusRequestedAlready.value = true
-        } else {
-            viewModel.closeSearch()
-            showingSearchResult.value = false
-            focusRequestedAlready.value = false
-            searchLazyListState.scrollToItem(0)
+            actions.onSearchFieldFocusRequested()
         }
     }
 
     ScaffoldWrapper(
         topAppBarActions = {
-            val icon = if (searchIsActivated.value) Icons.Default.Close else Icons.Outlined.Search
-            val description =
-                stringResource(if (searchIsActivated.value) R.string.close else R.string.search)
+            val icon = if (state.showSearchField) Icons.Default.Close else Icons.Outlined.Search
+            val description = stringResource(if (state.showSearchField) R.string.close else R.string.search)
             ProjectIconButton(
                 imageVector = icon,
                 contentDescription = description,
                 onClick = {
-                    searchIsActivated.value = searchIsActivated.value.not()
+                    if (state.showSearchField) {
+                        actions.onCloseSearch()
+                    } else {
+                        actions.onOpenSearch()
+                    }
                 }
             )
         },
@@ -94,7 +89,7 @@ fun ListOfGifsScreen(
     ) {
 
         LazyListWithEventTracking(
-            flow = currentGifsFlow.value,
+            flow = state.currentGifsFlow,
             lazyListState = currentLazyListState,
             firstLoading = {
                 InProgress(
@@ -123,47 +118,47 @@ fun ListOfGifsScreen(
             }
         ) {
 
-            if (searchIsActivated.value) {
+            if (state.showSearchField) {
                 stickyHeader(
                     key = "Search"
                 ) {
                     BackStackEntryComposable(
                         onBackPressedListener = {
-                            searchIsActivated.value = false
-                            viewModel.closeSearch()
-                            showingSearchResult.value = false
+                            actions.onCloseSearch()
                         }
                     )
                     SearchField(
-                        request = viewModel.searchRequest.collectAsState().value,
-                        enabled = viewModel.searchRequestIsCorrect.value,
+                        request = state.searchRequest,
+                        enabled = state.searchRequestIsCorrect,
                         onSearchClick = {
                             coroutineScope.launch {
                                 searchLazyListState.scrollToItem(0)
                             }
-                            viewModel.search()
-                            showingSearchResult.value = true
+                            actions.onSearchClick()
                         },
                         onSearchRequestChange = {
-                            viewModel.setSearchRequest(it)
+                            actions.onSearchRequestChange(it)
                         },
                         focusRequester = searchFieldFocusRequester
                     )
                 }
             }
-
             itemsIndexed(
                 lazyPagingGifs,
                 key = { i, gif ->
-                    gif.generatedUniqueId
+                    gif.uniqueId
                 }
             ) { i, gif ->
                 if (gif != null) {
                     GifItem(
                         i,
                         gif,
-                        onSaveClick = { viewModel.changeSavedState(gif) },
-                        onItemClick = onItemClick
+                        onSaveClick = {
+                            actions.onChangeSavedStateForGif(gif)
+                        },
+                        onItemClick = { index, clickedGif ->
+                            actions.onGifClick(index, clickedGif)
+                        }
                     )
                 }
             }
@@ -176,11 +171,10 @@ fun ListOfGifsScreen(
 @Composable
 private fun GifItem(
     index: Int,
-    gif: Gif,
-    onSaveClick: suspend () -> Boolean,
+    gif: GifUiModel,
+    onSaveClick: () -> Unit,
     onItemClick: OnGifClick,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     Column(
         Modifier
             .fillMaxWidth()
@@ -208,15 +202,11 @@ private fun GifItem(
                 }
             )
 
-            val isSavedState = remember { mutableStateOf(gif.isSaved) }
             ProjectIconButton(
-                if (isSavedState.value) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                if (gif.isSaved.value) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                 stringResource(R.string.save_gif),
                 onClick = {
-                    coroutineScope.launch {
-                        val newValue = onSaveClick()
-                        isSavedState.value = newValue
-                    }
+                    onSaveClick()
                 },
                 modifier = Modifier
                     .constrainAs(iconRef) {

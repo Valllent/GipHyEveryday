@@ -1,9 +1,9 @@
 package com.valllent.giphy.domain.usecases
 
-import com.valllent.giphy.domain.repositories.SavedGifsRepository
+import com.valllent.giphy.domain.repositories.SavedGifsDbRepository
 
-class ChangeSavedStateForGif(
-    private val savedGifsRepository: SavedGifsRepository
+class ChangeSavedStateForGifUseCase(
+    private val savedGifsRepository: SavedGifsDbRepository
 ) {
 
     suspend operator fun invoke(id: String): Boolean {
