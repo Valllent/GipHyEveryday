@@ -1,4 +1,4 @@
-package com.valllent.giphy.app.presentation.ui.screens
+package com.valllent.giphy.app.presentation.ui.screens.detail
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,23 +12,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.paging.PagingData
 import com.valllent.giphy.app.presentation.data.preview.GifPreviewData
 import com.valllent.giphy.app.presentation.data.view.GifUiModel
 import com.valllent.giphy.app.presentation.ui.GlobalListeners
 import com.valllent.giphy.app.presentation.ui.views.*
 import com.valllent.giphy.app.presentation.ui.wrappers.PreviewWrapper
 import com.valllent.giphy.app.presentation.ui.wrappers.ScaffoldWrapper
-import kotlinx.coroutines.flow.Flow
 
 @Composable
-fun DetailGifScreen(flow: Flow<PagingData<GifUiModel>>, selectedGifIndex: Int, globalListeners: GlobalListeners) {
+fun DetailGifScreen(
+    state: DetailGifScreenState,
+    globalListeners: GlobalListeners
+) {
     ScaffoldWrapper(
         globalListeners = globalListeners
     ) {
         LazyPagerWithEventTracking(
-            flow = flow,
-            currentItemIndex = selectedGifIndex,
+            flow = state.gifsFlow,
+            currentItemIndex = state.currentItemIndex,
             getKey = {
                 it.uniqueId
             },

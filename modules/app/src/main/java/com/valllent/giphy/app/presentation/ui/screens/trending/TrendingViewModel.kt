@@ -9,8 +9,8 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.valllent.giphy.app.presentation.data.providers.GifPagingSource
 import com.valllent.giphy.app.presentation.data.view.GifUiModel
+import com.valllent.giphy.app.presentation.ui.screens.BaseViewModel
 import com.valllent.giphy.app.presentation.ui.utils.Constants
-import com.valllent.giphy.app.presentation.ui.viewmodels.BaseViewModel
 import com.valllent.giphy.domain.usecases.ChangeSavedStateForGifUseCase
 import com.valllent.giphy.domain.usecases.GetTrendingGifsUseCase
 import com.valllent.giphy.domain.usecases.SearchGifsUseCase

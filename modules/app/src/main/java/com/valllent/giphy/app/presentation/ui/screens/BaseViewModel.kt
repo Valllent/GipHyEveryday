@@ -1,4 +1,4 @@
-package com.valllent.giphy.app.presentation.ui.viewmodels
+package com.valllent.giphy.app.presentation.ui.screens
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

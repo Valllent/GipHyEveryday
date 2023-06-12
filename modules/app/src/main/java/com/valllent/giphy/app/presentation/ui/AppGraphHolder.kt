@@ -1,7 +1,6 @@
 package com.valllent.giphy.app.presentation.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
@@ -12,15 +11,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.valllent.giphy.app.presentation.data.view.DrawerItemUiModel
 import com.valllent.giphy.app.presentation.data.view.GifUiModel
-import com.valllent.giphy.app.presentation.ui.screens.DetailGifScreen
-import com.valllent.giphy.app.presentation.ui.screens.ListOfSavedGifsScreen
+import com.valllent.giphy.app.presentation.ui.screens.detail.DetailGifScreen
+import com.valllent.giphy.app.presentation.ui.screens.detail.DetailGifScreenState
+import com.valllent.giphy.app.presentation.ui.screens.saved.SavedGifsActions
+import com.valllent.giphy.app.presentation.ui.screens.saved.SavedGifsScreen
+import com.valllent.giphy.app.presentation.ui.screens.saved.SavedGifsViewModel
 import com.valllent.giphy.app.presentation.ui.screens.trending.TrendingScreen
 import com.valllent.giphy.app.presentation.ui.screens.trending.TrendingScreenActions
 import com.valllent.giphy.app.presentation.ui.screens.trending.TrendingViewModel
 import com.valllent.giphy.app.presentation.ui.theme.ProjectTheme
 import com.valllent.giphy.app.presentation.ui.utils.GetNavigationController
 import com.valllent.giphy.app.presentation.ui.utils.OnDrawerItemSelected
-import com.valllent.giphy.app.presentation.ui.viewmodels.SavedGifsViewModel
 
 sealed class Screen(
     val staticRoute: String
@@ -73,7 +74,15 @@ sealed class Screen(
         @Composable
         fun Content(onItemClick: (Int, GifUiModel) -> Unit, globalListeners: GlobalListeners) {
             val viewModel = hiltViewModel<SavedGifsViewModel>()
-            ListOfSavedGifsScreen(viewModel, onItemClick, globalListeners)
+
+            val state = viewModel.state.value
+            val actions = SavedGifsActions(
+                onGifItemClick = onItemClick,
+                onChangeSavedStateForGif = {
+                    viewModel.changeSavedState(it)
+                }
+            )
+            SavedGifsScreen(state, actions, globalListeners)
         }
 
     }
@@ -88,14 +97,18 @@ sealed class Screen(
             navController: NavController,
             globalListeners: GlobalListeners
         ) {
-            val selectedGifIndex =
+            val currentItemIndex =
                 navBackStackEntry.arguments?.getString(DETAIL_SCREEN_ARGUMENT_GIF_INDEX)?.toIntOrNull() ?: 0
 
             val backStackEntry = remember { checkNotNull(navController.previousBackStackEntry) }
             val viewModel = hiltViewModel<TrendingViewModel>(backStackEntry)
 
             val flow = viewModel.state.value.currentGifsFlow
-            DetailGifScreen(flow, selectedGifIndex, globalListeners)
+            val state = DetailGifScreenState(
+                gifsFlow = flow,
+                currentItemIndex = currentItemIndex
+            )
+            DetailGifScreen(state, globalListeners)
         }
 
     }
@@ -110,14 +123,18 @@ sealed class Screen(
             navController: NavController,
             globalListeners: GlobalListeners
         ) {
-            val selectedGifIndex =
+            val currentItemIndex =
                 navBackStackEntry.arguments?.getString(DETAIL_SCREEN_ARGUMENT_GIF_INDEX)?.toIntOrNull() ?: 0
 
             val backStackEntry = remember { checkNotNull(navController.previousBackStackEntry) }
             val viewModel = hiltViewModel<SavedGifsViewModel>(backStackEntry)
 
-            val flow = viewModel.currentGifsFlow.collectAsState().value
-            DetailGifScreen(flow, selectedGifIndex, globalListeners)
+            val flow = viewModel.state.value.gifsFlow
+            val state = DetailGifScreenState(
+                gifsFlow = flow,
+                currentItemIndex = currentItemIndex
+            )
+            DetailGifScreen(state, globalListeners)
         }
 
     }

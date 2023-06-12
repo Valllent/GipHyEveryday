@@ -1,4 +1,4 @@
-package com.valllent.giphy.app.presentation.ui.screens
+package com.valllent.giphy.app.presentation.ui.screens.saved
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,7 +8,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -24,23 +23,20 @@ import com.valllent.giphy.app.presentation.data.view.GifUiModel
 import com.valllent.giphy.app.presentation.ui.GlobalListeners
 import com.valllent.giphy.app.presentation.ui.theme.ProjectTheme
 import com.valllent.giphy.app.presentation.ui.utils.OnGifClick
-import com.valllent.giphy.app.presentation.ui.viewmodels.SavedGifsViewModel
 import com.valllent.giphy.app.presentation.ui.views.*
 import com.valllent.giphy.app.presentation.ui.wrappers.ScaffoldWrapper
 import kotlinx.coroutines.launch
 
 @Composable
-fun ListOfSavedGifsScreen(
-    viewModel: SavedGifsViewModel,
-    onItemClick: OnGifClick,
+fun SavedGifsScreen(
+    state: SavedGifsState,
+    actions: SavedGifsActions,
     globalListeners: GlobalListeners
 ) {
     val lazyListState = rememberLazyListState()
-
-    val currentGifsFlow = viewModel.currentGifsFlow.collectAsState()
-    val lazyPagingGifs = currentGifsFlow.value.collectAsLazyPagingItems()
-
     val coroutineScope = rememberCoroutineScope()
+
+    val lazyPagingGifs = state.gifsFlow.collectAsLazyPagingItems()
 
     ScaffoldWrapper(
         onTopAppBarLogoClick = {
@@ -52,7 +48,7 @@ fun ListOfSavedGifsScreen(
     ) {
 
         LazyListWithEventTracking(
-            flow = currentGifsFlow.value,
+            flow = state.gifsFlow,
             lazyListState = lazyListState,
             firstLoading = {
                 InProgress(
@@ -90,8 +86,8 @@ fun ListOfSavedGifsScreen(
                     GifItem(
                         i,
                         gif,
-                        onSaveClick = { viewModel.changeSavedState(gif.id) },
-                        onItemClick = onItemClick
+                        onSaveClick = actions.onChangeSavedStateForGif,
+                        onItemClick = actions.onGifItemClick
                     )
                 }
             }
@@ -105,10 +101,9 @@ fun ListOfSavedGifsScreen(
 private fun GifItem(
     index: Int,
     gif: GifUiModel,
-    onSaveClick: suspend () -> Boolean,
+    onSaveClick: (GifUiModel) -> Unit,
     onItemClick: OnGifClick,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     Column(
         Modifier
             .fillMaxWidth()
@@ -140,11 +135,7 @@ private fun GifItem(
                 if (gif.isSaved.value) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                 stringResource(R.string.save_gif),
                 onClick = {
-                    coroutineScope.launch {
-                        TODO()
-                        val newValue = onSaveClick()
-                        gif.changeSavedState(newValue)
-                    }
+                    onSaveClick(gif)
                 },
                 modifier = Modifier
                     .constrainAs(iconRef) {
