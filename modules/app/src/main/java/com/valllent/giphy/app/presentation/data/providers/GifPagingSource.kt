@@ -4,7 +4,6 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.valllent.giphy.app.presentation.data.view.GifUiModel
 import com.valllent.giphy.domain.data.GifPage
-import kotlinx.coroutines.delay
 
 class GifPagingSource(
     private val fetchGifs: suspend (Int) -> GifPage?
@@ -13,12 +12,6 @@ class GifPagingSource(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, GifUiModel> {
         val pageNumber = params.key ?: 0
         val offset = params.loadSize
-
-        // TODO: Remove
-        if (pageNumber >= 1) {
-            delay(5000)
-        }
-
         val gifPage = fetchGifs(offset * pageNumber)
 
         if (gifPage == null) {

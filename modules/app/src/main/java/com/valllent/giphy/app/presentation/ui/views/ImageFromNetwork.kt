@@ -16,11 +16,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.skydoves.landscapist.glide.GlideImage
 import com.valllent.giphy.R
 import com.valllent.giphy.app.presentation.ui.wrappers.PreviewWrapper
@@ -32,7 +31,6 @@ fun ImageFromNetwork(
     modifier: Modifier = Modifier,
     thumbnailUrl: String? = null,
 ) {
-    val context = LocalContext.current
     val urlState = remember { mutableStateOf(url) }
     GlideImage(
         imageModel = { urlState.value },
@@ -48,15 +46,8 @@ fun ImageFromNetwork(
                 }
             }
         },
-        requestBuilder = {
-            val thumbnailRequest = Glide
-                .with(context)
-                .load(thumbnailUrl)
-
-            Glide
-                .with(context)
-                .asDrawable()
-                .thumbnail(thumbnailRequest)
+        requestOptions = {
+            RequestOptions().timeout(20_000)
         }
     )
 }

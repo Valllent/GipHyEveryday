@@ -79,7 +79,7 @@ fun ProjectNavigationDrawer(
 @Preview
 private fun PreviewProjectNavigationDrawer() {
     PreviewWrapper {
-        ProjectNavigationDrawer(DrawerState(DrawerValue.Open), GlobalListeners({}, { TODO() })) {
+        ProjectNavigationDrawer(DrawerState(DrawerValue.Open), GlobalListeners({}, { throw NullPointerException() })) {
 
         }
     }

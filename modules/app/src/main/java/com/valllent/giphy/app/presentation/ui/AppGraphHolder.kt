@@ -199,7 +199,7 @@ private fun createOnDrawerItemSelectedListener(navController: NavHostController)
             }
 
             DrawerItemUiModel.SETTINGS -> {
-                TODO()
+
             }
 
             DrawerItemUiModel.SEPARATOR -> {}
