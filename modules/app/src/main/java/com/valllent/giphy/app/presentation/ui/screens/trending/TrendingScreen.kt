@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemsIndexed
+import androidx.paging.compose.itemKey
 import com.valllent.giphy.R
 import com.valllent.giphy.app.presentation.data.preview.GifPreviewData
 import com.valllent.giphy.app.presentation.data.view.GifUiModel
@@ -143,12 +143,13 @@ fun TrendingScreen(
                     )
                 }
             }
-            itemsIndexed(
-                lazyPagingGifs,
-                key = { i, gif ->
-                    gif.uniqueId
-                }
-            ) { i, gif ->
+            items(
+                lazyPagingGifs.itemCount,
+                key = lazyPagingGifs.itemKey {
+                    it.uniqueId
+                },
+            ) { i ->
+                val gif = lazyPagingGifs[i]
                 if (gif != null) {
                     GifItem(
                         i,
