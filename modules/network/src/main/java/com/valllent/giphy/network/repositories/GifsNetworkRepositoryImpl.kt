@@ -5,6 +5,7 @@ import com.valllent.giphy.domain.repositories.GifsNetworkRepository
 import com.valllent.giphy.network.api.GifsApi
 import com.valllent.giphy.network.converters.GifConverter
 import com.valllent.giphy.network.utils.CoroutineExtensions
+import kotlinx.coroutines.delay
 
 class GifsNetworkRepositoryImpl(
     private val gifsApi: GifsApi
@@ -21,6 +22,10 @@ class GifsNetworkRepositoryImpl(
     override suspend fun getTrendingGifs(offset: Int, count: Int): GifPage? {
         val networkGifResponse = CoroutineExtensions.runSafely {
             gifsApi.getTrendingGifs(offset, count)
+        }
+        if (offset > 1) {
+            // TODO:
+            delay(5_000)
         }
         return GifConverter(networkGifResponse)
     }

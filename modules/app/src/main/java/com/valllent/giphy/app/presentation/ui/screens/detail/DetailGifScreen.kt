@@ -22,13 +22,14 @@ import com.valllent.giphy.app.presentation.ui.wrappers.ScaffoldWrapper
 @Composable
 fun DetailGifScreen(
     state: DetailGifScreenState,
+    actions: DetailGifScreenActions,
     globalListeners: GlobalListeners
 ) {
     ScaffoldWrapper(
         globalListeners = globalListeners
     ) {
         LazyPagerWithEventTracking(
-            flow = state.gifsFlow,
+            state.pagerList,
             currentItemIndex = state.currentItemIndex,
             getKey = {
                 it.uniqueId
@@ -39,12 +40,15 @@ fun DetailGifScreen(
             loading = {
                 InProgress()
             },
-            loadingFailed = { retry ->
+            loadingFailed = {
                 DataFetchingFailed(
                     onRetryClick = {
-                        retry()
+                        actions.onRetryClick()
                     }
                 )
+            },
+            onRetry = {
+                actions.onRetryClick()
             }
         )
     }

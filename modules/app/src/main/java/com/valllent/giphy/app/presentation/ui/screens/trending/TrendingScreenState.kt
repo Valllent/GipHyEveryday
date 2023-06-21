@@ -1,13 +1,11 @@
 package com.valllent.giphy.app.presentation.ui.screens.trending
 
-import androidx.compose.runtime.Stable
-import androidx.paging.PagingData
 import com.valllent.giphy.app.presentation.data.view.GifUiModel
-import kotlinx.coroutines.flow.Flow
+import com.valllent.giphy.app.presentation.ui.pager.PagerListState
+import kotlinx.coroutines.flow.StateFlow
 
-@Stable
 data class TrendingScreenState(
-    val currentGifsFlow: Flow<PagingData<GifUiModel>>,
+    val gifs: StateFlow<PagerListState<GifUiModel>>,
     val searchRequest: String,
     val searchRequestIsCorrect: Boolean,
     val showSearchField: Boolean,

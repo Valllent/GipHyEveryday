@@ -1,13 +1,11 @@
 package com.valllent.giphy.app.presentation.data.view
 
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.valllent.giphy.domain.data.Gif
 import java.util.*
 
-@Stable
 data class GifUiModel(
     val id: String,
     val title: String,

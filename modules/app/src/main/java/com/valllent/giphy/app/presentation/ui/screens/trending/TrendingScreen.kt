@@ -13,10 +13,7 @@ import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.stringResource
@@ -24,12 +21,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemKey
 import com.valllent.giphy.R
 import com.valllent.giphy.app.presentation.data.preview.GifPreviewData
 import com.valllent.giphy.app.presentation.data.view.GifUiModel
 import com.valllent.giphy.app.presentation.ui.GlobalListeners
+import com.valllent.giphy.app.presentation.ui.pager.ScrollToEndTracker
 import com.valllent.giphy.app.presentation.ui.theme.ProjectTheme
 import com.valllent.giphy.app.presentation.ui.utils.OnGifClick
 import com.valllent.giphy.app.presentation.ui.views.*
@@ -43,14 +39,14 @@ fun TrendingScreen(
     actions: TrendingScreenActions,
     globalListeners: GlobalListeners,
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val mainLazyListState = rememberLazyListState()
     val searchLazyListState = rememberLazyListState()
     val searchFieldFocusRequester = remember { FocusRequester() }
 
     val currentLazyListState = if (state.showSearchResultList) searchLazyListState else mainLazyListState
 
-    val coroutineScope = rememberCoroutineScope()
-    val lazyPagingGifs = state.currentGifsFlow.collectAsLazyPagingItems()
+    val pagerList = state.gifs.collectAsState().value
 
     LaunchedEffect(state.showSearchField) {
         if (state.showSearchField) {
@@ -88,17 +84,21 @@ fun TrendingScreen(
         globalListeners = globalListeners,
     ) {
 
+        ScrollToEndTracker(currentLazyListState) {
+            actions.onLoadNextPage()
+        }
+
         LazyListWithEventTracking(
-            flow = state.currentGifsFlow,
+            state = pagerList,
             lazyListState = currentLazyListState,
             firstLoading = {
                 InProgress(
                     modifier = Modifier.fillMaxSize(),
                 )
             },
-            firstLoadingFailed = { retry ->
+            firstLoadingFailed = {
                 DataFetchingFailed(onRetryClick = {
-                    retry()
+                    actions.onLoadNextPage()
                 })
             },
             loadingNewItems = {
@@ -108,16 +108,15 @@ fun TrendingScreen(
                     fraction = 0.6f
                 )
             },
-            loadingNewItemsFailed = { retry ->
+            loadingNewItemsFailed = {
                 DataFetchingFailed(
                     modifier = Modifier.height(100.dp),
                     onRetryClick = {
-                        retry()
+                        actions.onLoadNextPage()
                     }
                 )
             }
         ) {
-
             if (state.showSearchField) {
                 stickyHeader(
                     key = "Search"
@@ -144,24 +143,22 @@ fun TrendingScreen(
                 }
             }
             items(
-                lazyPagingGifs.itemCount,
-                key = lazyPagingGifs.itemKey {
-                    it.uniqueId
-                },
-            ) { i ->
-                val gif = lazyPagingGifs[i]
-                if (gif != null) {
-                    GifItem(
-                        i,
-                        gif,
-                        onSaveClick = {
-                            actions.onChangeSavedStateForGif(gif)
-                        },
-                        onItemClick = { index, clickedGif ->
-                            actions.onGifClick(index, clickedGif)
-                        }
-                    )
+                pagerList.data.size,
+                key = { index ->
+                    pagerList.data[index].uniqueId
                 }
+            ) { i ->
+                val gif = pagerList.data[i]
+                GifItem(
+                    i,
+                    gif,
+                    onSaveClick = {
+                        actions.onChangeSavedStateForGif(gif)
+                    },
+                    onItemClick = { index, clickedGif ->
+                        actions.onGifClick(index, clickedGif)
+                    }
+                )
             }
 
         }

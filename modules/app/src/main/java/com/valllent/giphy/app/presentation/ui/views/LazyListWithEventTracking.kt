@@ -10,8 +10,58 @@ import androidx.compose.ui.Modifier
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.valllent.giphy.app.presentation.ui.pager.LoadingState
+import com.valllent.giphy.app.presentation.ui.pager.PagerListState
 import com.valllent.giphy.app.presentation.ui.utils.Retry
 import kotlinx.coroutines.flow.Flow
+
+@Composable
+fun <T : Any> LazyListWithEventTracking(
+    state: PagerListState<T>,
+    firstLoading: @Composable () -> Unit,
+    firstLoadingFailed: @Composable () -> Unit,
+    loadingNewItems: @Composable () -> Unit,
+    loadingNewItemsFailed: @Composable () -> Unit,
+    lazyListState: LazyListState = rememberLazyListState(),
+    content: LazyListScope.() -> Unit,
+) {
+    when (state.firstLoadingState) {
+        LoadingState.NOT_LOADING -> {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = lazyListState,
+            ) {
+                content()
+
+                when (state.appendLoadingState) {
+                    LoadingState.LOADING -> {
+                        item {
+                            loadingNewItems()
+                        }
+                    }
+
+                    LoadingState.FAILED -> {
+                        item {
+                            loadingNewItemsFailed()
+                        }
+                    }
+
+                    else -> {}
+                }
+            }
+        }
+
+        LoadingState.LOADING -> {
+            firstLoading()
+        }
+
+        LoadingState.FAILED -> {
+            firstLoadingFailed()
+        }
+    }
+
+}
+
 
 @Composable
 fun <T : Any> LazyListWithEventTracking(

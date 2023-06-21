@@ -1,10 +1,9 @@
 package com.valllent.giphy.app.presentation.ui.screens.detail
 
-import androidx.paging.PagingData
 import com.valllent.giphy.app.presentation.data.view.GifUiModel
-import kotlinx.coroutines.flow.Flow
+import com.valllent.giphy.app.presentation.ui.pager.PagerListState
 
 data class DetailGifScreenState(
-    val gifsFlow: Flow<PagingData<GifUiModel>>,
+    val pagerList: PagerListState<GifUiModel>,
     val currentItemIndex: Int,
 )

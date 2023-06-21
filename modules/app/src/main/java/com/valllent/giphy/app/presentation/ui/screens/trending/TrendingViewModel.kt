@@ -3,19 +3,15 @@ package com.valllent.giphy.app.presentation.ui.screens.trending
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
-import com.valllent.giphy.app.presentation.data.providers.GifPagingSource
 import com.valllent.giphy.app.presentation.data.view.GifUiModel
+import com.valllent.giphy.app.presentation.ui.pager.CustomPager
 import com.valllent.giphy.app.presentation.ui.screens.BaseViewModel
 import com.valllent.giphy.app.presentation.ui.utils.Constants
 import com.valllent.giphy.domain.usecases.ChangeSavedStateForGifUseCase
 import com.valllent.giphy.domain.usecases.GetTrendingGifsUseCase
 import com.valllent.giphy.domain.usecases.SearchGifsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,21 +21,17 @@ class TrendingViewModel @Inject constructor(
     private val changeSavedStateForGifUseCase: ChangeSavedStateForGifUseCase,
 ) : BaseViewModel() {
 
-    private val pagingConfig = PagingConfig(pageSize = Constants.ITEMS_COUNT_PER_REQUEST)
-
-    private val trendingGifsFlow = Pager(
-        config = pagingConfig,
-        pagingSourceFactory = {
-            GifPagingSource { offset -> getTrendingGifsUseCase(offset, Constants.ITEMS_COUNT_PER_REQUEST) }
-        }
-    ).flow.cachedIn(viewModelScope)
-
-    private var searchGifsFlow: Flow<PagingData<GifUiModel>>? = null
-
+    private val trendingPager = CustomPager { pageNumber ->
+        getTrendingGifsUseCase(
+            pageNumber * Constants.ITEMS_COUNT_PER_REQUEST,
+            Constants.ITEMS_COUNT_PER_REQUEST
+        )?.gifs?.map { GifUiModel.from(it) }
+    }
+    private var searchPager: CustomPager<GifUiModel>? = null
 
     private val _state = mutableStateOf(
         TrendingScreenState(
-            trendingGifsFlow,
+            trendingPager.state,
             "",
             searchRequestIsCorrect = false,
             showSearchField = false,
@@ -49,6 +41,13 @@ class TrendingViewModel @Inject constructor(
     )
     val state: State<TrendingScreenState>
         get() = _state
+
+
+    init {
+        viewModelScope.launch {
+            trendingPager.requestNextPage()
+        }
+    }
 
 
     fun changeSavedState(gifUiModel: GifUiModel) {
@@ -67,17 +66,23 @@ class TrendingViewModel @Inject constructor(
 
     fun search() {
         if (_state.value.searchRequestIsCorrect) {
-            val searchPagingSource = GifPagingSource { offset ->
-                searchGifsUseCase(state.value.searchRequest, offset, Constants.ITEMS_COUNT_PER_REQUEST)
-            }
-            searchGifsFlow = Pager(
-                config = pagingConfig,
-                pagingSourceFactory = { searchPagingSource }
-            ).flow.cachedIn(viewModelScope).apply {
-                _state.value = _state.value.copy(
-                    currentGifsFlow = this,
-                    showSearchResultList = true
-                )
+            viewModelScope.launch {
+                searchPager = CustomPager { pageNumber ->
+                    searchGifsUseCase(
+                        _state.value.searchRequest,
+                        pageNumber * Constants.ITEMS_COUNT_PER_REQUEST,
+                        Constants.ITEMS_COUNT_PER_REQUEST
+                    )?.gifs?.map { GifUiModel.from(it) }
+                }
+
+                searchPager?.let {
+                    it.requestNextPage()
+
+                    _state.value = _state.value.copy(
+                        gifs = it.state,
+                        showSearchResultList = true
+                    )
+                }
             }
         }
     }
@@ -89,8 +94,9 @@ class TrendingViewModel @Inject constructor(
     }
 
     fun hideSearchField() {
+        searchPager = null
         _state.value = _state.value.copy(
-            currentGifsFlow = trendingGifsFlow,
+            gifs = trendingPager.state,
             showSearchField = false,
             showSearchResultList = false,
             searchFieldFocusRequestedAlready = false,
@@ -101,6 +107,21 @@ class TrendingViewModel @Inject constructor(
         _state.value = _state.value.copy(
             searchFieldFocusRequestedAlready = true
         )
+    }
+
+    fun loadNextPageOrRetryPrevious() {
+        viewModelScope.launch {
+            getCurrentPager().requestNextPage()
+        }
+    }
+
+    private fun getCurrentPager(): CustomPager<GifUiModel> {
+        val searchPager = searchPager
+        if (state.value.showSearchResultList && searchPager != null) {
+            return searchPager
+        }
+
+        return trendingPager
     }
 
 }

@@ -1,6 +1,7 @@
 package com.valllent.giphy.app.presentation.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
@@ -12,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import com.valllent.giphy.app.presentation.data.view.DrawerItemUiModel
 import com.valllent.giphy.app.presentation.data.view.GifUiModel
 import com.valllent.giphy.app.presentation.ui.screens.detail.DetailGifScreen
+import com.valllent.giphy.app.presentation.ui.screens.detail.DetailGifScreenActions
 import com.valllent.giphy.app.presentation.ui.screens.detail.DetailGifScreenState
 import com.valllent.giphy.app.presentation.ui.screens.saved.SavedGifsActions
 import com.valllent.giphy.app.presentation.ui.screens.saved.SavedGifsScreen
@@ -60,6 +62,9 @@ sealed class Screen(
                 },
                 onSearchFieldFocusRequested = {
                     viewModel.searchFieldFocusRequested()
+                },
+                onLoadNextPage = {
+                    viewModel.loadNextPageOrRetryPrevious()
                 }
             )
             TrendingScreen(state, actions, globalListeners)
@@ -103,12 +108,17 @@ sealed class Screen(
             val backStackEntry = remember { checkNotNull(navController.previousBackStackEntry) }
             val viewModel = hiltViewModel<TrendingViewModel>(backStackEntry)
 
-            val flow = viewModel.state.value.currentGifsFlow
+            val pagerList = viewModel.state.value.gifs.collectAsState().value
             val state = DetailGifScreenState(
-                gifsFlow = flow,
+                pagerList = pagerList,
                 currentItemIndex = currentItemIndex
             )
-            DetailGifScreen(state, globalListeners)
+            val actions = DetailGifScreenActions(
+                onRetryClick = {
+                    TODO()
+                }
+            )
+            DetailGifScreen(state, actions, globalListeners)
         }
 
     }
@@ -129,12 +139,13 @@ sealed class Screen(
             val backStackEntry = remember { checkNotNull(navController.previousBackStackEntry) }
             val viewModel = hiltViewModel<SavedGifsViewModel>(backStackEntry)
 
-            val flow = viewModel.state.value.gifsFlow
-            val state = DetailGifScreenState(
-                gifsFlow = flow,
-                currentItemIndex = currentItemIndex
-            )
-            DetailGifScreen(state, globalListeners)
+            TODO()
+//            val flow = viewModel.state.value.gifsFlow
+//            val state = DetailGifScreenState(
+//                pagerList = flow,
+//                currentItemIndex = currentItemIndex
+//            )
+//            DetailGifScreen(state, globalListeners)
         }
 
     }
