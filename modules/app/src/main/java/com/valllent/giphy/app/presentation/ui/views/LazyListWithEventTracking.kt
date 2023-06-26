@@ -11,20 +11,26 @@ import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.valllent.giphy.app.presentation.ui.pager.LoadingState
-import com.valllent.giphy.app.presentation.ui.pager.PagerListState
+import com.valllent.giphy.app.presentation.ui.pager.PagerList
+import com.valllent.giphy.app.presentation.ui.pager.ScrollToEndTracker
 import com.valllent.giphy.app.presentation.ui.utils.Retry
 import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun <T : Any> LazyListWithEventTracking(
-    state: PagerListState<T>,
+    state: PagerList<T>,
     firstLoading: @Composable () -> Unit,
     firstLoadingFailed: @Composable () -> Unit,
     loadingNewItems: @Composable () -> Unit,
     loadingNewItemsFailed: @Composable () -> Unit,
     lazyListState: LazyListState = rememberLazyListState(),
+    onScrollToEnd: () -> Unit,
     content: LazyListScope.() -> Unit,
 ) {
+    ScrollToEndTracker(lazyListState) {
+        onScrollToEnd()
+    }
+
     when (state.firstLoadingState) {
         LoadingState.NOT_LOADING -> {
             LazyColumn(

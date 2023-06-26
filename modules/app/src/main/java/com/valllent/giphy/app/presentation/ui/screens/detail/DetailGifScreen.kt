@@ -1,6 +1,8 @@
 package com.valllent.giphy.app.presentation.ui.screens.detail
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -8,6 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -19,18 +22,23 @@ import com.valllent.giphy.app.presentation.ui.views.*
 import com.valllent.giphy.app.presentation.ui.wrappers.PreviewWrapper
 import com.valllent.giphy.app.presentation.ui.wrappers.ScaffoldWrapper
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DetailGifScreen(
     state: DetailGifScreenState,
     actions: DetailGifScreenActions,
     globalListeners: GlobalListeners
 ) {
+    val pagerList = state.pagerListFlow.collectAsState().value
+    val pagerState = rememberPagerState(state.currentItemIndex)
+
     ScaffoldWrapper(
         globalListeners = globalListeners
     ) {
+
         LazyPagerWithEventTracking(
-            state.pagerList,
-            currentItemIndex = state.currentItemIndex,
+            pagerList,
+            pagerState = pagerState,
             getKey = {
                 it.uniqueId
             },
@@ -43,13 +51,13 @@ fun DetailGifScreen(
             loadingFailed = {
                 DataFetchingFailed(
                     onRetryClick = {
-                        actions.onRetryClick()
+                        actions.onLoadNextPageOrRetry()
                     }
                 )
             },
-            onRetry = {
-                actions.onRetryClick()
-            }
+            onScrollToEnd = {
+                actions.onLoadNextPageOrRetry()
+            },
         )
     }
 }

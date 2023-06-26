@@ -25,7 +25,6 @@ import com.valllent.giphy.R
 import com.valllent.giphy.app.presentation.data.preview.GifPreviewData
 import com.valllent.giphy.app.presentation.data.view.GifUiModel
 import com.valllent.giphy.app.presentation.ui.GlobalListeners
-import com.valllent.giphy.app.presentation.ui.pager.ScrollToEndTracker
 import com.valllent.giphy.app.presentation.ui.theme.ProjectTheme
 import com.valllent.giphy.app.presentation.ui.utils.OnGifClick
 import com.valllent.giphy.app.presentation.ui.views.*
@@ -83,11 +82,6 @@ fun TrendingScreen(
         },
         globalListeners = globalListeners,
     ) {
-
-        ScrollToEndTracker(currentLazyListState) {
-            actions.onLoadNextPage()
-        }
-
         LazyListWithEventTracking(
             state = pagerList,
             lazyListState = currentLazyListState,
@@ -98,7 +92,7 @@ fun TrendingScreen(
             },
             firstLoadingFailed = {
                 DataFetchingFailed(onRetryClick = {
-                    actions.onLoadNextPage()
+                    actions.onLoadNextPageOrRetry()
                 })
             },
             loadingNewItems = {
@@ -112,9 +106,12 @@ fun TrendingScreen(
                 DataFetchingFailed(
                     modifier = Modifier.height(100.dp),
                     onRetryClick = {
-                        actions.onLoadNextPage()
+                        actions.onLoadNextPageOrRetry()
                     }
                 )
+            },
+            onScrollToEnd = {
+                actions.onLoadNextPageOrRetry()
             }
         ) {
             if (state.showSearchField) {

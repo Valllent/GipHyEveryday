@@ -3,10 +3,7 @@ package com.valllent.giphy.app.presentation.ui.pager
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 
 @Composable
 fun ScrollToEndTracker(
@@ -28,16 +25,19 @@ fun ScrollToEndTracker(
 @Composable
 fun ScrollToEndTracker(
     pagerState: PagerState,
-    itemsCount: Int,
+    pagerList: PagerList<*>,
     loadWhenItemsToEnd: Int = 3,
     event: () -> Unit,
 ) {
     val isScrollToEnd by remember {
         derivedStateOf {
+            val itemsCount = pagerList.data.size
             pagerState.currentPage == itemsCount - loadWhenItemsToEnd
         }
     }
-    if (isScrollToEnd) {
-        event()
+    LaunchedEffect(isScrollToEnd) {
+        if (isScrollToEnd) {
+            event()
+        }
     }
 }

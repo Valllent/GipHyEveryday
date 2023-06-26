@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
     private fun showSplashScreen() {
         val splashScreen = installSplashScreen()
         splashScreen.setKeepOnScreenCondition {
-//            viewModel.initializationInProgress.value
+            viewModel.initializationInProgress.value
             false
         }
     }

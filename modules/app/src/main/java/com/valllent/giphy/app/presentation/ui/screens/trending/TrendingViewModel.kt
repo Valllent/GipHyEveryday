@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.valllent.giphy.app.presentation.data.view.GifUiModel
 import com.valllent.giphy.app.presentation.ui.pager.CustomPager
+import com.valllent.giphy.app.presentation.ui.pager.PagerProvider
 import com.valllent.giphy.app.presentation.ui.screens.BaseViewModel
 import com.valllent.giphy.app.presentation.ui.utils.Constants
 import com.valllent.giphy.domain.usecases.ChangeSavedStateForGifUseCase
@@ -16,17 +17,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TrendingViewModel @Inject constructor(
+    private val pagerProvider: PagerProvider,
     private val getTrendingGifsUseCase: GetTrendingGifsUseCase,
     private val searchGifsUseCase: SearchGifsUseCase,
     private val changeSavedStateForGifUseCase: ChangeSavedStateForGifUseCase,
 ) : BaseViewModel() {
 
-    private val trendingPager = CustomPager { pageNumber ->
-        getTrendingGifsUseCase(
-            pageNumber * Constants.ITEMS_COUNT_PER_REQUEST,
-            Constants.ITEMS_COUNT_PER_REQUEST
-        )?.gifs?.map { GifUiModel.from(it) }
-    }
+    private val trendingPager = pagerProvider.getTrendingPager(getTrendingGifsUseCase)
     private var searchPager: CustomPager<GifUiModel>? = null
 
     private val _state = mutableStateOf(
@@ -45,7 +42,7 @@ class TrendingViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            trendingPager.requestNextPage()
+            trendingPager.loadFirstPageIfNotYet()
         }
     }
 
@@ -76,7 +73,7 @@ class TrendingViewModel @Inject constructor(
                 }
 
                 searchPager?.let {
-                    it.requestNextPage()
+                    it.loadNextPage()
 
                     _state.value = _state.value.copy(
                         gifs = it.state,
@@ -111,7 +108,7 @@ class TrendingViewModel @Inject constructor(
 
     fun loadNextPageOrRetryPrevious() {
         viewModelScope.launch {
-            getCurrentPager().requestNextPage()
+            getCurrentPager().loadNextPage()
         }
     }
 

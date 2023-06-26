@@ -1,12 +1,9 @@
 package com.valllent.giphy.app.presentation.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
+import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -14,7 +11,7 @@ import com.valllent.giphy.app.presentation.data.view.DrawerItemUiModel
 import com.valllent.giphy.app.presentation.data.view.GifUiModel
 import com.valllent.giphy.app.presentation.ui.screens.detail.DetailGifScreen
 import com.valllent.giphy.app.presentation.ui.screens.detail.DetailGifScreenActions
-import com.valllent.giphy.app.presentation.ui.screens.detail.DetailGifScreenState
+import com.valllent.giphy.app.presentation.ui.screens.detail.DetailGifViewModel
 import com.valllent.giphy.app.presentation.ui.screens.saved.SavedGifsActions
 import com.valllent.giphy.app.presentation.ui.screens.saved.SavedGifsScreen
 import com.valllent.giphy.app.presentation.ui.screens.saved.SavedGifsViewModel
@@ -25,13 +22,14 @@ import com.valllent.giphy.app.presentation.ui.theme.ProjectTheme
 import com.valllent.giphy.app.presentation.ui.utils.GetNavigationController
 import com.valllent.giphy.app.presentation.ui.utils.OnDrawerItemSelected
 
+
+object ScreenArguments {
+    const val DETAIL_SCREEN_GIF_INDEX = "gifIndex"
+}
+
 sealed class Screen(
     val staticRoute: String
 ) {
-
-    companion object {
-        const val DETAIL_SCREEN_ARGUMENT_GIF_INDEX = "gifIndex"
-    }
 
     object ListOfGifs : Screen("gifs/trending") {
 
@@ -63,7 +61,7 @@ sealed class Screen(
                 onSearchFieldFocusRequested = {
                     viewModel.searchFieldFocusRequested()
                 },
-                onLoadNextPage = {
+                onLoadNextPageOrRetry = {
                     viewModel.loadNextPageOrRetryPrevious()
                 }
             )
@@ -92,38 +90,29 @@ sealed class Screen(
 
     }
 
-    object DetailGif : Screen("gifs/trending/{$DETAIL_SCREEN_ARGUMENT_GIF_INDEX}") {
+    object DetailGif : Screen("gifs/trending/{${ScreenArguments.DETAIL_SCREEN_GIF_INDEX}}") {
 
         fun createRoute(gifIndex: Int) = "gifs/trending/$gifIndex"
 
         @Composable
         fun Content(
-            navBackStackEntry: NavBackStackEntry,
-            navController: NavController,
             globalListeners: GlobalListeners
         ) {
-            val currentItemIndex =
-                navBackStackEntry.arguments?.getString(DETAIL_SCREEN_ARGUMENT_GIF_INDEX)?.toIntOrNull() ?: 0
+            val viewModel = hiltViewModel<DetailGifViewModel>()
 
-            val backStackEntry = remember { checkNotNull(navController.previousBackStackEntry) }
-            val viewModel = hiltViewModel<TrendingViewModel>(backStackEntry)
-
-            val pagerList = viewModel.state.value.gifs.collectAsState().value
-            val state = DetailGifScreenState(
-                pagerList = pagerList,
-                currentItemIndex = currentItemIndex
-            )
+            val state = viewModel.state.value
             val actions = DetailGifScreenActions(
-                onRetryClick = {
-                    TODO()
+                onLoadNextPageOrRetry = {
+                    viewModel.loadNextPageOrRetryPrevious()
                 }
             )
+
             DetailGifScreen(state, actions, globalListeners)
         }
 
     }
 
-    object DetailSavedGif : Screen("gifs/saved/{$DETAIL_SCREEN_ARGUMENT_GIF_INDEX}") {
+    object DetailSavedGif : Screen("gifs/saved/{${ScreenArguments.DETAIL_SCREEN_GIF_INDEX}}") {
 
         fun createRoute(gifIndex: Int) = "gifs/saved/$gifIndex"
 
@@ -134,7 +123,7 @@ sealed class Screen(
             globalListeners: GlobalListeners
         ) {
             val currentItemIndex =
-                navBackStackEntry.arguments?.getString(DETAIL_SCREEN_ARGUMENT_GIF_INDEX)?.toIntOrNull() ?: 0
+                navBackStackEntry.arguments?.getString(ScreenArguments.DETAIL_SCREEN_GIF_INDEX)?.toIntOrNull() ?: 0
 
             val backStackEntry = remember { checkNotNull(navController.previousBackStackEntry) }
             val viewModel = hiltViewModel<SavedGifsViewModel>(backStackEntry)
@@ -177,8 +166,16 @@ fun AppGraphHolder() {
                 )
             }
 
-            composable(Screen.DetailGif.staticRoute) {
-                Screen.DetailGif.Content(it, navController, globalListeners)
+            composable(
+                Screen.DetailGif.staticRoute,
+                arguments = listOf(
+                    navArgument(ScreenArguments.DETAIL_SCREEN_GIF_INDEX) {
+                        type = NavType.IntType
+                        defaultValue = 0
+                    }
+                )
+            ) {
+                Screen.DetailGif.Content(globalListeners)
             }
 
             composable(Screen.ListOfSavedGifs.staticRoute) {

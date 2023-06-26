@@ -2,13 +2,14 @@ package com.valllent.giphy.app.presentation.ui.views
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.valllent.giphy.app.presentation.ui.pager.LoadingState
-import com.valllent.giphy.app.presentation.ui.pager.PagerListState
+import com.valllent.giphy.app.presentation.ui.pager.PagerList
 import com.valllent.giphy.app.presentation.ui.pager.ScrollToEndTracker
 import com.valllent.giphy.app.presentation.ui.utils.Retry
 import kotlinx.coroutines.flow.Flow
@@ -17,13 +18,13 @@ import java.util.*
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun <T : Any> LazyPagerWithEventTracking(
-    pagerList: PagerListState<T>,
-    currentItemIndex: Int,
+    pagerList: PagerList<T>,
+    pagerState: PagerState = rememberPagerState(),
     getKey: (T) -> String,
     item: @Composable (T) -> Unit,
     loading: @Composable () -> Unit,
     loadingFailed: @Composable () -> Unit,
-    onRetry: () -> Unit,
+    onScrollToEnd: () -> Unit
 ) {
     val appendState = pagerList.appendLoadingState
 
@@ -34,10 +35,8 @@ fun <T : Any> LazyPagerWithEventTracking(
         0
     }
 
-    val pagerState = rememberPagerState(currentItemIndex)
-
-    ScrollToEndTracker(pagerState, pagerList.data.size) {
-        onRetry()
+    ScrollToEndTracker(pagerState, pagerList) {
+        onScrollToEnd()
     }
 
     HorizontalPager(
