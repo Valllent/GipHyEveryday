@@ -11,9 +11,14 @@ fun ScrollToEndTracker(
     loadWhenItemsToEnd: Int = 3,
     event: () -> Unit,
 ) {
+    // Fix because Compose ignores new LazyListState.
+    val state = remember { mutableStateOf(lazyListState) }
+    state.value = lazyListState
+
     val isScrollToEnd by remember {
         derivedStateOf {
-            lazyListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == lazyListState.layoutInfo.totalItemsCount - loadWhenItemsToEnd
+            val lastVisibleItemIndex = state.value.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+            lastVisibleItemIndex == state.value.layoutInfo.totalItemsCount - loadWhenItemsToEnd
         }
     }
     if (isScrollToEnd) {

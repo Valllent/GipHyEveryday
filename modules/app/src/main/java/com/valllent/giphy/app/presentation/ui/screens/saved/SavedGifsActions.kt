@@ -2,10 +2,10 @@ package com.valllent.giphy.app.presentation.ui.screens.saved
 
 import androidx.compose.runtime.Stable
 import com.valllent.giphy.app.presentation.data.view.GifUiModel
-import com.valllent.giphy.app.presentation.ui.utils.OnGifClick
+import com.valllent.giphy.app.presentation.ui.screens.detail.OpenDetailScreenLambda
 
 @Stable
 data class SavedGifsActions(
-    val onGifItemClick: OnGifClick,
+    val onGifItemClick: OpenDetailScreenLambda,
     val onChangeSavedStateForGif: (GifUiModel) -> Unit,
 )

@@ -7,11 +7,11 @@ import com.valllent.giphy.app.presentation.data.view.GifUiModel
 import com.valllent.giphy.app.presentation.ui.pager.CustomPager
 import com.valllent.giphy.app.presentation.ui.pager.PagerProvider
 import com.valllent.giphy.app.presentation.ui.screens.BaseViewModel
-import com.valllent.giphy.app.presentation.ui.utils.Constants
 import com.valllent.giphy.domain.usecases.ChangeSavedStateForGifUseCase
 import com.valllent.giphy.domain.usecases.GetTrendingGifsUseCase
 import com.valllent.giphy.domain.usecases.SearchGifsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,6 +25,8 @@ class TrendingViewModel @Inject constructor(
 
     private val trendingPager = pagerProvider.getTrendingPager(getTrendingGifsUseCase)
     private var searchPager: CustomPager<GifUiModel>? = null
+
+    private var lastSearchJob: Job? = null
 
     private val _state = mutableStateOf(
         TrendingScreenState(
@@ -63,17 +65,12 @@ class TrendingViewModel @Inject constructor(
 
     fun search() {
         if (_state.value.searchRequestIsCorrect) {
-            viewModelScope.launch {
-                searchPager = CustomPager { pageNumber ->
-                    searchGifsUseCase(
-                        _state.value.searchRequest,
-                        pageNumber * Constants.ITEMS_COUNT_PER_REQUEST,
-                        Constants.ITEMS_COUNT_PER_REQUEST
-                    )?.gifs?.map { GifUiModel.from(it) }
-                }
+            lastSearchJob?.cancel()
 
+            lastSearchJob = viewModelScope.launch {
+                searchPager = pagerProvider.getSearchPager(searchGifsUseCase, state.value.searchRequest)
                 searchPager?.let {
-                    it.loadNextPage()
+                    it.loadFirstPageIfNotYet()
 
                     _state.value = _state.value.copy(
                         gifs = it.state,

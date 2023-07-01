@@ -21,8 +21,8 @@ import com.valllent.giphy.R
 import com.valllent.giphy.app.presentation.data.preview.GifPreviewData
 import com.valllent.giphy.app.presentation.data.view.GifUiModel
 import com.valllent.giphy.app.presentation.ui.GlobalListeners
+import com.valllent.giphy.app.presentation.ui.screens.detail.OpenDetailScreenLambda
 import com.valllent.giphy.app.presentation.ui.theme.ProjectTheme
-import com.valllent.giphy.app.presentation.ui.utils.OnGifClick
 import com.valllent.giphy.app.presentation.ui.views.*
 import com.valllent.giphy.app.presentation.ui.wrappers.ScaffoldWrapper
 import kotlinx.coroutines.launch
@@ -103,7 +103,7 @@ private fun GifItem(
     index: Int,
     gif: GifUiModel,
     onSaveClick: (GifUiModel) -> Unit,
-    onItemClick: OnGifClick,
+    onItemClick: OpenDetailScreenLambda,
 ) {
     Column(
         Modifier
@@ -128,7 +128,7 @@ private fun GifItem(
                         height = Dimension.preferredWrapContent
                     },
                 onClick = {
-                    onItemClick(index, gif)
+                    onItemClick.run(OpenDetailScreenLambda.Arguments.Saved(index))
                 }
             )
 
@@ -151,7 +151,7 @@ private fun GifItem(
                 .fillMaxWidth()
                 .aspectRatio(gif.width / gif.height.toFloat())
                 .clickable {
-                    onItemClick(index, gif)
+                    onItemClick.run(OpenDetailScreenLambda.Arguments.Saved(index))
                 },
             tonalElevation = 24.dp,
             shadowElevation = 8.dp
@@ -167,7 +167,7 @@ private fun GifItem(
 fun ListOfSavedGifsPreview_1() {
     ProjectTheme {
         Column {
-            GifItem(0, GifPreviewData.getList()[0], { true }) { _, _ -> }
+            GifItem(0, GifPreviewData.getList()[0], { true }) { _ -> }
         }
     }
 }
@@ -177,7 +177,7 @@ fun ListOfSavedGifsPreview_1() {
 fun ListOfSavedGifsPreview_2() {
     ProjectTheme {
         Column {
-            GifItem(1, GifPreviewData.getList()[1], { true }) { _, _ -> }
+            GifItem(1, GifPreviewData.getList()[1], { true }) { _ -> }
         }
     }
 }
@@ -187,7 +187,7 @@ fun ListOfSavedGifsPreview_2() {
 fun ListOfSavedGifsPreview_3() {
     ProjectTheme {
         Column {
-            GifItem(2, GifPreviewData.getList()[2], { true }) { _, _ -> }
+            GifItem(2, GifPreviewData.getList()[2], { true }) { _ -> }
         }
     }
 }

@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun <T : Any> LazyListWithEventTracking(
-    state: PagerList<T>,
+    pagerList: PagerList<T>,
     firstLoading: @Composable () -> Unit,
     firstLoadingFailed: @Composable () -> Unit,
     loadingNewItems: @Composable () -> Unit,
@@ -31,7 +31,7 @@ fun <T : Any> LazyListWithEventTracking(
         onScrollToEnd()
     }
 
-    when (state.firstLoadingState) {
+    when (pagerList.firstLoadingState) {
         LoadingState.NOT_LOADING -> {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -39,7 +39,7 @@ fun <T : Any> LazyListWithEventTracking(
             ) {
                 content()
 
-                when (state.appendLoadingState) {
+                when (pagerList.appendLoadingState) {
                     LoadingState.LOADING -> {
                         item {
                             loadingNewItems()

@@ -2,10 +2,11 @@ package com.valllent.giphy.app.presentation.ui.screens.trending
 
 import androidx.compose.runtime.Stable
 import com.valllent.giphy.app.presentation.data.view.GifUiModel
+import com.valllent.giphy.app.presentation.ui.screens.detail.OpenDetailScreenLambda
 
 @Stable
 data class TrendingScreenActions(
-    val onGifClick: (Int, GifUiModel) -> Unit,
+    val onGifClick: OpenDetailScreenLambda,
     val onOpenSearch: () -> Unit,
     val onCloseSearch: () -> Unit,
     val onSearchClick: () -> Unit,

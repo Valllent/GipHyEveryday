@@ -48,6 +48,12 @@ class CustomPager<T>(
                 emit(result.getOrNull())
             }
                 .onStart { setState(newLoadingState = LoadingState.LOADING) }
+                .onCompletion { exception ->
+                    val jobWasCancelled = exception != null
+                    if (jobWasCancelled) {
+                        setState(newLoadingState = LoadingState.NOT_LOADING)
+                    }
+                }
                 .retry(2)
                 .flowOn(Dispatchers.IO)
                 .collect { newList ->

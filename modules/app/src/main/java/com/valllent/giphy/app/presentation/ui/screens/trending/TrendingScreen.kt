@@ -25,8 +25,8 @@ import com.valllent.giphy.R
 import com.valllent.giphy.app.presentation.data.preview.GifPreviewData
 import com.valllent.giphy.app.presentation.data.view.GifUiModel
 import com.valllent.giphy.app.presentation.ui.GlobalListeners
+import com.valllent.giphy.app.presentation.ui.screens.detail.OpenDetailScreenLambda
 import com.valllent.giphy.app.presentation.ui.theme.ProjectTheme
-import com.valllent.giphy.app.presentation.ui.utils.OnGifClick
 import com.valllent.giphy.app.presentation.ui.views.*
 import com.valllent.giphy.app.presentation.ui.wrappers.ScaffoldWrapper
 import kotlinx.coroutines.launch
@@ -39,25 +39,33 @@ fun TrendingScreen(
     globalListeners: GlobalListeners,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val mainLazyListState = rememberLazyListState()
+    val trendingLazyListState = rememberLazyListState()
     val searchLazyListState = rememberLazyListState()
     val searchFieldFocusRequester = remember { FocusRequester() }
-
-    val currentLazyListState = if (state.showSearchResultList) searchLazyListState else mainLazyListState
+    val currentLazyListState = remember { mutableStateOf(trendingLazyListState) }
+    val currentPagerType = remember { mutableStateOf(OpenDetailScreenLambda.PagerType.TRENDING) }
 
     val pagerList = state.gifs.collectAsState().value
+
+
+    LaunchedEffect(state.showSearchResultList) {
+        currentLazyListState.value = if (state.showSearchResultList) searchLazyListState else trendingLazyListState
+        currentPagerType.value =
+            if (state.showSearchResultList) OpenDetailScreenLambda.PagerType.SEARCH else OpenDetailScreenLambda.PagerType.TRENDING
+    }
 
     LaunchedEffect(state.showSearchField) {
         if (state.showSearchField) {
             if (state.searchFieldFocusRequestedAlready.not()) {
-                if (currentLazyListState.firstVisibleItemIndex in 0..5) {
-                    currentLazyListState.animateScrollToItem(0)
+                if (currentLazyListState.value.firstVisibleItemIndex in 0..5) {
+                    currentLazyListState.value.animateScrollToItem(0)
                 }
                 searchFieldFocusRequester.requestFocus()
             }
             actions.onSearchFieldFocusRequested()
         }
     }
+
 
     ScaffoldWrapper(
         topAppBarActions = {
@@ -77,14 +85,14 @@ fun TrendingScreen(
         },
         onTopAppBarLogoClick = {
             coroutineScope.launch {
-                currentLazyListState.animateScrollToItem(0)
+                currentLazyListState.value.animateScrollToItem(0)
             }
         },
         globalListeners = globalListeners,
     ) {
         LazyListWithEventTracking(
-            state = pagerList,
-            lazyListState = currentLazyListState,
+            pagerList = pagerList,
+            lazyListState = currentLazyListState.value,
             firstLoading = {
                 InProgress(
                     modifier = Modifier.fillMaxSize(),
@@ -152,8 +160,14 @@ fun TrendingScreen(
                     onSaveClick = {
                         actions.onChangeSavedStateForGif(gif)
                     },
-                    onItemClick = { index, clickedGif ->
-                        actions.onGifClick(index, clickedGif)
+                    onItemClick = { index ->
+                        actions.onGifClick.run(
+                            if (state.showSearchResultList) {
+                                OpenDetailScreenLambda.Arguments.Search(index, state.searchRequest)
+                            } else {
+                                OpenDetailScreenLambda.Arguments.Trending(index)
+                            }
+                        )
                     }
                 )
             }
@@ -168,7 +182,7 @@ private fun GifItem(
     index: Int,
     gif: GifUiModel,
     onSaveClick: () -> Unit,
-    onItemClick: OnGifClick,
+    onItemClick: (Int) -> Unit,
 ) {
     Column(
         Modifier
@@ -193,7 +207,7 @@ private fun GifItem(
                         height = Dimension.preferredWrapContent
                     },
                 onClick = {
-                    onItemClick(index, gif)
+                    onItemClick(index)
                 }
             )
 
@@ -216,7 +230,7 @@ private fun GifItem(
                 .fillMaxWidth()
                 .aspectRatio(gif.width / gif.height.toFloat())
                 .clickable {
-                    onItemClick(index, gif)
+                    onItemClick(index)
                 },
             tonalElevation = 24.dp,
             shadowElevation = 8.dp
@@ -232,7 +246,7 @@ private fun GifItem(
 fun ListOfGifsPreview_1() {
     ProjectTheme {
         Column {
-            GifItem(0, GifPreviewData.getList()[0], { true }) { _, _ -> }
+            GifItem(0, GifPreviewData.getList()[0], { true }) { _ -> }
         }
     }
 }
@@ -242,7 +256,7 @@ fun ListOfGifsPreview_1() {
 fun ListOfGifsPreview_2() {
     ProjectTheme {
         Column {
-            GifItem(1, GifPreviewData.getList()[1], { true }) { _, _ -> }
+            GifItem(1, GifPreviewData.getList()[1], { true }) { _ -> }
         }
     }
 }
@@ -252,7 +266,7 @@ fun ListOfGifsPreview_2() {
 fun ListOfGifsPreview_3() {
     ProjectTheme {
         Column {
-            GifItem(2, GifPreviewData.getList()[2], { true }) { _, _ -> }
+            GifItem(2, GifPreviewData.getList()[2], { true }) { _ -> }
         }
     }
 }
