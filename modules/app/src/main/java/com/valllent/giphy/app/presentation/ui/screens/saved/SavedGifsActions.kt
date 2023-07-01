@@ -8,4 +8,5 @@ import com.valllent.giphy.app.presentation.ui.screens.detail.OpenDetailScreenLam
 data class SavedGifsActions(
     val onGifItemClick: OpenDetailScreenLambda,
     val onChangeSavedStateForGif: (GifUiModel) -> Unit,
+    val onLoadNextPagerOrRetry: () -> Unit,
 )

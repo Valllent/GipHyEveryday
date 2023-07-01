@@ -6,21 +6,25 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemKey
 import com.valllent.giphy.R
 import com.valllent.giphy.app.presentation.data.preview.GifPreviewData
 import com.valllent.giphy.app.presentation.data.view.GifUiModel
 import com.valllent.giphy.app.presentation.ui.GlobalListeners
+import com.valllent.giphy.app.presentation.ui.pager.LoadingState
 import com.valllent.giphy.app.presentation.ui.screens.detail.OpenDetailScreenLambda
 import com.valllent.giphy.app.presentation.ui.theme.ProjectTheme
 import com.valllent.giphy.app.presentation.ui.views.*
@@ -36,7 +40,8 @@ fun SavedGifsScreen(
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
-    val lazyPagingGifs = state.gifsFlow.collectAsLazyPagingItems()
+    val pagerList = state.pagerList.collectAsState().value
+    val gifs = pagerList.data
 
     ScaffoldWrapper(
         onTopAppBarLogoClick = {
@@ -46,44 +51,57 @@ fun SavedGifsScreen(
         },
         globalListeners = globalListeners,
     ) {
-
-        LazyListWithEventTracking(
-            flow = state.gifsFlow,
-            lazyListState = lazyListState,
-            firstLoading = {
-                InProgress(
-                    modifier = Modifier.fillMaxSize(),
-                )
-            },
-            firstLoadingFailed = { retry ->
-                DataFetchingFailed(onRetryClick = {
-                    retry()
-                })
-            },
-            loadingNewItems = {
-                InProgress(
-                    modifier = Modifier
-                        .height(100.dp),
-                    fraction = 0.6f
-                )
-            },
-            loadingNewItemsFailed = { retry ->
-                DataFetchingFailed(
-                    modifier = Modifier.height(100.dp),
-                    onRetryClick = {
-                        retry()
-                    }
+        if (gifs.isEmpty() && pagerList.firstLoadingState == LoadingState.NOT_LOADING) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.empty_saved_list),
+                    style = MaterialTheme.typography.displaySmall,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.primary,
                 )
             }
-        ) {
-            items(
-                lazyPagingGifs.itemCount,
-                key = lazyPagingGifs.itemKey {
-                    it.uniqueId
+        } else {
+            LazyListWithEventTracking(
+                pagerList = pagerList,
+                firstLoading = {
+                    InProgress(
+                        modifier = Modifier.fillMaxSize(),
+                    )
                 },
-            ) { i ->
-                val gif = lazyPagingGifs.peek(i)
-                if (gif != null) {
+                firstLoadingFailed = { ->
+                    DataFetchingFailed(onRetryClick = {
+                        actions.onLoadNextPagerOrRetry()
+                    })
+                },
+                loadingNewItems = {
+                    InProgress(
+                        modifier = Modifier
+                            .height(100.dp),
+                        fraction = 0.6f
+                    )
+                },
+                loadingNewItemsFailed = { ->
+                    DataFetchingFailed(
+                        modifier = Modifier.height(100.dp),
+                        onRetryClick = {
+                            actions.onLoadNextPagerOrRetry()
+                        }
+                    )
+                },
+                onScrollToEnd = {
+                    actions.onLoadNextPagerOrRetry()
+                }
+            ) {
+                items(
+                    gifs.size,
+                    key = {
+                        gifs[it].uniqueId
+                    }
+                ) { i ->
+                    val gif = gifs[i]
                     GifItem(
                         i,
                         gif,
@@ -91,8 +109,8 @@ fun SavedGifsScreen(
                         onItemClick = actions.onGifItemClick
                     )
                 }
-            }
 
+            }
         }
     }
 }

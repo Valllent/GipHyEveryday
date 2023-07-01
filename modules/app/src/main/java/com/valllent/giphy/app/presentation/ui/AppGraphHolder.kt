@@ -87,6 +87,9 @@ sealed class Screen(
                 onGifItemClick = onItemClick,
                 onChangeSavedStateForGif = {
                     viewModel.changeSavedState(it)
+                },
+                onLoadNextPagerOrRetry = {
+                    viewModel.loadNextPageOrRetry()
                 }
             )
             SavedGifsScreen(state, actions, globalListeners)

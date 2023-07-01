@@ -9,6 +9,7 @@
     <string name="retry">Retry</string>
     <string name="save_gif">Save gif</string>
     <string name="can_not_fetch_data">Can\'t fetch data</string>
+    <string name="empty_saved_list">Empty saved list</string>
 
     <string name="trending">Trending</string>
     <string name="saved">Saved</string>

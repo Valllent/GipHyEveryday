@@ -73,11 +73,15 @@ class PagerProvider private constructor() : DefaultLifecycleObserver {
                 getSavedGifsUseCase(
                     pageNumber * Constants.ITEMS_COUNT_PER_REQUEST,
                     Constants.ITEMS_COUNT_PER_REQUEST
-                )?.gifs?.map { GifUiModel.from(it) }
+                )?.gifs?.map { GifUiModel.from(it) } ?: emptyList()
             }
         }
 
         return checkNotNull(savedGifsPager)
+    }
+
+    fun clearSavedGifsPager() {
+        savedGifsPager = null
     }
 
     override fun onDestroy(owner: LifecycleOwner) {

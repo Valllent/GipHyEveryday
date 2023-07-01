@@ -1,11 +1,11 @@
 package com.valllent.giphy.app.presentation.ui.screens.saved
 
 import androidx.compose.runtime.Stable
-import androidx.paging.PagingData
 import com.valllent.giphy.app.presentation.data.view.GifUiModel
-import kotlinx.coroutines.flow.Flow
+import com.valllent.giphy.app.presentation.ui.pager.PagerList
+import kotlinx.coroutines.flow.StateFlow
 
 @Stable
 data class SavedGifsState(
-    val gifsFlow: Flow<PagingData<GifUiModel>>
+    val pagerList: StateFlow<PagerList<GifUiModel>>
 )
