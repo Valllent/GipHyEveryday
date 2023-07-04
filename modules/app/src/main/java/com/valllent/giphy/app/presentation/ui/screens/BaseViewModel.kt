@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.valllent.giphy.app.presentation.ui.utils.CoroutineExtensions
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 open class BaseViewModel : ViewModel() {
@@ -26,8 +27,8 @@ open class BaseViewModel : ViewModel() {
         return CoroutineExtensions.runSafely(code)
     }
 
-    protected fun launch(code: suspend () -> Unit) {
-        viewModelScope.launch(coroutineContext) {
+    protected fun launch(code: suspend () -> Unit): Job {
+        return viewModelScope.launch(coroutineContext) {
             code()
         }
     }

@@ -5,6 +5,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -13,14 +16,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.valllent.giphy.R
 import com.valllent.giphy.app.presentation.data.preview.GifPreviewData
-import com.valllent.giphy.app.presentation.data.view.GifUiModel
 import com.valllent.giphy.app.presentation.ui.GlobalListeners
 import com.valllent.giphy.app.presentation.ui.views.*
 import com.valllent.giphy.app.presentation.ui.wrappers.PreviewWrapper
 import com.valllent.giphy.app.presentation.ui.wrappers.ScaffoldWrapper
+import com.valllent.giphy.domain.data.Gif
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -32,7 +37,21 @@ fun DetailGifScreen(
     val pagerList = state.pagerListFlow.collectAsState().value
     val pagerState = rememberPagerState(state.currentItemIndex)
 
+    val currentGif = pagerList.data[pagerState.currentPage]
+    val isSaved = currentGif.isSaved
+
     ScaffoldWrapper(
+        topAppBarActions = {
+            val icon = if (isSaved) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder
+            val description = stringResource(if (isSaved) R.string.unsave_gif else R.string.save_gif)
+            ProjectIconButton(
+                imageVector = icon,
+                contentDescription = description,
+                onClick = {
+                    actions.onChangeSavedStateForGif(currentGif.id)
+                }
+            )
+        },
         globalListeners = globalListeners
     ) {
 
@@ -63,7 +82,7 @@ fun DetailGifScreen(
 }
 
 @Composable
-private fun DetailGif(gif: GifUiModel) {
+private fun DetailGif(gif: Gif) {
     Column(
         modifier = Modifier
             .fillMaxSize()

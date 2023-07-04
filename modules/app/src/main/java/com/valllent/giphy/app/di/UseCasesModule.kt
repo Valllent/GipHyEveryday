@@ -2,10 +2,7 @@ package com.valllent.giphy.app.di
 
 import com.valllent.giphy.domain.repositories.GifsNetworkRepository
 import com.valllent.giphy.domain.repositories.SavedGifsDbRepository
-import com.valllent.giphy.domain.usecases.ChangeSavedStateForGifUseCase
-import com.valllent.giphy.domain.usecases.GetSavedGifsUseCase
-import com.valllent.giphy.domain.usecases.GetTrendingGifsUseCase
-import com.valllent.giphy.domain.usecases.SearchGifsUseCase
+import com.valllent.giphy.domain.usecases.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,6 +31,11 @@ class UseCasesModule {
     @Provides
     fun provideChangeSavedStateForGif(savedGifsRepository: SavedGifsDbRepository): ChangeSavedStateForGifUseCase {
         return ChangeSavedStateForGifUseCase(savedGifsRepository)
+    }
+
+    @Provides
+    fun provideGetSavedStateForGif(savedGifsRepository: SavedGifsDbRepository): GetSavedStateForGifUseCase {
+        return GetSavedStateForGifUseCase(savedGifsRepository)
     }
 
     @Provides

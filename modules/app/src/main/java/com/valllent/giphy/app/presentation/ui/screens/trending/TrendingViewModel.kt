@@ -2,29 +2,28 @@ package com.valllent.giphy.app.presentation.ui.screens.trending
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.viewModelScope
-import com.valllent.giphy.app.presentation.data.view.GifUiModel
-import com.valllent.giphy.app.presentation.ui.pager.CustomPager
+import com.valllent.giphy.app.presentation.data.providers.GifCustomPager
 import com.valllent.giphy.app.presentation.ui.pager.PagerProvider
 import com.valllent.giphy.app.presentation.ui.screens.BaseViewModel
 import com.valllent.giphy.domain.usecases.ChangeSavedStateForGifUseCase
+import com.valllent.giphy.domain.usecases.GetSavedStateForGifUseCase
 import com.valllent.giphy.domain.usecases.GetTrendingGifsUseCase
 import com.valllent.giphy.domain.usecases.SearchGifsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class TrendingViewModel @Inject constructor(
+    getTrendingGifsUseCase: GetTrendingGifsUseCase,
     private val pagerProvider: PagerProvider,
-    private val getTrendingGifsUseCase: GetTrendingGifsUseCase,
     private val searchGifsUseCase: SearchGifsUseCase,
     private val changeSavedStateForGifUseCase: ChangeSavedStateForGifUseCase,
+    private val getSavedStateForGifUseCase: GetSavedStateForGifUseCase,
 ) : BaseViewModel() {
 
     private val trendingPager = pagerProvider.getTrendingPager(getTrendingGifsUseCase)
-    private var searchPager: CustomPager<GifUiModel>? = null
+    private var searchPager: GifCustomPager? = null
 
     private var lastSearchJob: Job? = null
 
@@ -43,16 +42,16 @@ class TrendingViewModel @Inject constructor(
 
 
     init {
-        viewModelScope.launch {
+        launch {
             trendingPager.loadFirstPageIfNotYet()
         }
     }
 
 
-    fun changeSavedState(gifUiModel: GifUiModel) {
+    fun changeSavedState(id: String) {
         launchAsync {
-            val currentState = changeSavedStateForGifUseCase(gifUiModel.id)
-            gifUiModel.changeSavedState(currentState)
+            val newIsSavedValue = changeSavedStateForGifUseCase(id)
+            getCurrentPager().changeSavedStateForGif(id, newIsSavedValue)
         }
     }
 
@@ -67,7 +66,7 @@ class TrendingViewModel @Inject constructor(
         if (_state.value.searchRequestIsCorrect) {
             lastSearchJob?.cancel()
 
-            lastSearchJob = viewModelScope.launch {
+            lastSearchJob = launch {
                 searchPager = pagerProvider.getSearchPager(searchGifsUseCase, state.value.searchRequest)
                 searchPager?.let {
                     it.loadFirstPageIfNotYet()
@@ -104,12 +103,18 @@ class TrendingViewModel @Inject constructor(
     }
 
     fun loadNextPageOrRetryPrevious() {
-        viewModelScope.launch {
+        launch {
             getCurrentPager().loadNextPage()
         }
     }
 
-    private fun getCurrentPager(): CustomPager<GifUiModel> {
+    fun updateIsSavedValues() {
+        launch {
+            getCurrentPager().updateIsSavedValues(getSavedStateForGifUseCase)
+        }
+    }
+
+    private fun getCurrentPager(): GifCustomPager {
         val searchPager = searchPager
         if (state.value.showSearchResultList && searchPager != null) {
             return searchPager

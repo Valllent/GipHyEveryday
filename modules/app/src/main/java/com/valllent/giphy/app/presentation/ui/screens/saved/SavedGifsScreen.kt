@@ -22,13 +22,13 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.valllent.giphy.R
 import com.valllent.giphy.app.presentation.data.preview.GifPreviewData
-import com.valllent.giphy.app.presentation.data.view.GifUiModel
 import com.valllent.giphy.app.presentation.ui.GlobalListeners
 import com.valllent.giphy.app.presentation.ui.pager.LoadingState
 import com.valllent.giphy.app.presentation.ui.screens.detail.OpenDetailScreenLambda
 import com.valllent.giphy.app.presentation.ui.theme.ProjectTheme
 import com.valllent.giphy.app.presentation.ui.views.*
 import com.valllent.giphy.app.presentation.ui.wrappers.ScaffoldWrapper
+import com.valllent.giphy.domain.data.Gif
 import kotlinx.coroutines.launch
 
 @Composable
@@ -119,8 +119,8 @@ fun SavedGifsScreen(
 @Composable
 private fun GifItem(
     index: Int,
-    gif: GifUiModel,
-    onSaveClick: (GifUiModel) -> Unit,
+    gif: Gif,
+    onSaveClick: (String) -> Unit,
     onItemClick: OpenDetailScreenLambda,
 ) {
     Column(
@@ -151,10 +151,10 @@ private fun GifItem(
             )
 
             ProjectIconButton(
-                if (gif.isSaved.value) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                if (gif.isSaved) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                 stringResource(R.string.save_gif),
                 onClick = {
-                    onSaveClick(gif)
+                    onSaveClick(gif.id)
                 },
                 modifier = Modifier
                     .constrainAs(iconRef) {

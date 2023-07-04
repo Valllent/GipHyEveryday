@@ -5,4 +5,5 @@ import androidx.compose.runtime.Stable
 @Stable
 data class DetailGifScreenActions(
     val onLoadNextPageOrRetry: () -> Unit,
+    val onChangeSavedStateForGif: (id: String) -> Unit,
 )

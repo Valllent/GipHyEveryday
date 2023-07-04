@@ -21,14 +21,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.lifecycle.Lifecycle
 import com.valllent.giphy.R
 import com.valllent.giphy.app.presentation.data.preview.GifPreviewData
-import com.valllent.giphy.app.presentation.data.view.GifUiModel
 import com.valllent.giphy.app.presentation.ui.GlobalListeners
 import com.valllent.giphy.app.presentation.ui.screens.detail.OpenDetailScreenLambda
 import com.valllent.giphy.app.presentation.ui.theme.ProjectTheme
+import com.valllent.giphy.app.presentation.ui.utils.OnLifecycleEvent
 import com.valllent.giphy.app.presentation.ui.views.*
 import com.valllent.giphy.app.presentation.ui.wrappers.ScaffoldWrapper
+import com.valllent.giphy.domain.data.Gif
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -47,6 +49,15 @@ fun TrendingScreen(
 
     val pagerList = state.gifs.collectAsState().value
 
+    OnLifecycleEvent { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_CREATE -> {
+                actions.onReturnToPage()
+            }
+
+            else -> {}
+        }
+    }
 
     LaunchedEffect(state.showSearchResultList) {
         currentLazyListState.value = if (state.showSearchResultList) searchLazyListState else trendingLazyListState
@@ -158,7 +169,7 @@ fun TrendingScreen(
                     i,
                     gif,
                     onSaveClick = {
-                        actions.onChangeSavedStateForGif(gif)
+                        actions.onChangeSavedStateForGif(gif.id)
                     },
                     onItemClick = { index ->
                         actions.onGifClick.run(
@@ -180,7 +191,7 @@ fun TrendingScreen(
 @Composable
 private fun GifItem(
     index: Int,
-    gif: GifUiModel,
+    gif: Gif,
     onSaveClick: () -> Unit,
     onItemClick: (Int) -> Unit,
 ) {
@@ -212,7 +223,7 @@ private fun GifItem(
             )
 
             ProjectIconButton(
-                if (gif.isSaved.value) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                if (gif.isSaved) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                 stringResource(R.string.save_gif),
                 onClick = {
                     onSaveClick()

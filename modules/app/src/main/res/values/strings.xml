@@ -8,6 +8,7 @@
     <string name="clear">Clear</string>
     <string name="retry">Retry</string>
     <string name="save_gif">Save gif</string>
+    <string name="unsave_gif">Unsave gif</string>
     <string name="can_not_fetch_data">Can\'t fetch data</string>
     <string name="empty_saved_list">Empty saved list</string>
 

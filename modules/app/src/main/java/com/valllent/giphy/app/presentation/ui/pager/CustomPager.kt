@@ -4,7 +4,7 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 
-class CustomPager<T>(
+open class CustomPager<T>(
     private val fetchData: suspend (Int) -> List<T>?
 ) {
 
@@ -72,6 +72,10 @@ class CustomPager<T>(
                     firstLoading = false
                 }
         }
+    }
+
+    fun modifyList(newList: List<T>) {
+        setState(newList = newList)
     }
 
     private fun setState(

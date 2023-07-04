@@ -3,7 +3,7 @@ package com.valllent.giphy.app.presentation.ui.pager
 import android.util.Log
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.valllent.giphy.app.presentation.data.view.GifUiModel
+import com.valllent.giphy.app.presentation.data.providers.GifCustomPager
 import com.valllent.giphy.app.presentation.ui.utils.Constants
 import com.valllent.giphy.domain.usecases.GetSavedGifsUseCase
 import com.valllent.giphy.domain.usecases.GetTrendingGifsUseCase
@@ -31,35 +31,35 @@ class PagerProvider private constructor() : DefaultLifecycleObserver {
     }
 
 
-    private var trendingPager: CustomPager<GifUiModel>? = null
-    private var searchPager: CustomPager<GifUiModel>? = null
-    private var savedGifsPager: CustomPager<GifUiModel>? = null
+    private var trendingPager: GifCustomPager? = null
+    private var searchPager: GifCustomPager? = null
+    private var savedGifsPager: GifCustomPager? = null
 
     private var lastSearchRequest: String? = null
 
-    fun getTrendingPager(getTrendingGifsUseCase: GetTrendingGifsUseCase): CustomPager<GifUiModel> {
+    fun getTrendingPager(getTrendingGifsUseCase: GetTrendingGifsUseCase): GifCustomPager {
         if (trendingPager == null) {
-            trendingPager = CustomPager { pageNumber ->
+            trendingPager = GifCustomPager { pageNumber ->
                 getTrendingGifsUseCase(
                     pageNumber * Constants.ITEMS_COUNT_PER_REQUEST,
                     Constants.ITEMS_COUNT_PER_REQUEST
-                )?.gifs?.map { GifUiModel.from(it) }
+                )?.gifs
             }
         }
 
         return checkNotNull(trendingPager)
     }
 
-    fun getSearchPager(searchGifsUseCase: SearchGifsUseCase, searchRequest: String): CustomPager<GifUiModel> {
+    fun getSearchPager(searchGifsUseCase: SearchGifsUseCase, searchRequest: String): GifCustomPager {
         if (lastSearchRequest != searchRequest) searchPager = null
 
         if (searchPager == null) {
-            searchPager = CustomPager { pageNumber ->
+            searchPager = GifCustomPager { pageNumber ->
                 searchGifsUseCase(
                     searchRequest,
                     pageNumber * Constants.ITEMS_COUNT_PER_REQUEST,
                     Constants.ITEMS_COUNT_PER_REQUEST
-                )?.gifs?.map { GifUiModel.from(it) }
+                )?.gifs
             }
             lastSearchRequest = searchRequest
         }
@@ -67,13 +67,13 @@ class PagerProvider private constructor() : DefaultLifecycleObserver {
         return checkNotNull(searchPager)
     }
 
-    fun getSavedGifsPager(getSavedGifsUseCase: GetSavedGifsUseCase): CustomPager<GifUiModel> {
+    fun getSavedGifsPager(getSavedGifsUseCase: GetSavedGifsUseCase): GifCustomPager {
         if (savedGifsPager == null) {
-            savedGifsPager = CustomPager { pageNumber ->
+            savedGifsPager = GifCustomPager { pageNumber ->
                 getSavedGifsUseCase(
                     pageNumber * Constants.ITEMS_COUNT_PER_REQUEST,
                     Constants.ITEMS_COUNT_PER_REQUEST
-                )?.gifs?.map { GifUiModel.from(it) } ?: emptyList()
+                )?.gifs ?: emptyList()
             }
         }
 

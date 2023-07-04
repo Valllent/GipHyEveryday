@@ -67,6 +67,9 @@ sealed class Screen(
                 },
                 onLoadNextPageOrRetry = {
                     viewModel.loadNextPageOrRetryPrevious()
+                },
+                onReturnToPage = {
+                    viewModel.updateIsSavedValues()
                 }
             )
             TrendingScreen(state, actions, globalListeners)
@@ -128,6 +131,9 @@ sealed class Screen(
             val actions = DetailGifScreenActions(
                 onLoadNextPageOrRetry = {
                     viewModel.loadNextPageOrRetryPrevious()
+                },
+                onChangeSavedStateForGif = {
+                    viewModel.changeSavedState(it)
                 }
             )
 

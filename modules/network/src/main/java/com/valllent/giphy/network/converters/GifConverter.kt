@@ -1,5 +1,6 @@
 package com.valllent.giphy.network.converters
 
+import com.valllent.giphy.domain.data.Gif
 import com.valllent.giphy.domain.data.GifPage
 import com.valllent.giphy.network.data.responses.GifResponse
 
@@ -11,12 +12,12 @@ object GifConverter {
         val responseGifsList = gifResponse.gifsList
             ?: return GifPage(emptyList(), hasNextPage = false)
 
-        val gifs = ArrayList<com.valllent.giphy.domain.data.Gif>(responseGifsList.size)
+        val gifs = ArrayList<Gif>(responseGifsList.size)
         responseGifsList.forEach { responseGif ->
             if (responseGif?.id == null) return@forEach
 
             gifs.add(
-                com.valllent.giphy.domain.data.Gif(
+                Gif(
                     id = responseGif.id,
                     title = responseGif.title ?: "",
                     width = responseGif.urls?.originalUrl?.width ?: 100,
@@ -25,7 +26,8 @@ object GifConverter {
                     mediumUrl = responseGif.urls?.mediumUrl?.urlValue ?: "",
                     thumbnailUrl = responseGif.urls?.previewUrl?.urlValue ?: "",
                     postedBy = responseGif.username ?: "",
-                    postedDatetime = responseGif.postedDatetime ?: ""
+                    postedDatetime = responseGif.postedDatetime ?: "",
+                    isSaved = false
                 )
             )
         }
