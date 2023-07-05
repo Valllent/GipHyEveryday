@@ -39,11 +39,15 @@ class PagerProvider private constructor() : DefaultLifecycleObserver {
 
     fun getTrendingPager(getTrendingGifsUseCase: GetTrendingGifsUseCase): GifCustomPager {
         if (trendingPager == null) {
-            trendingPager = GifCustomPager { pageNumber ->
-                getTrendingGifsUseCase(
+            trendingPager = GifCustomPager { pageNumber, actions ->
+                val gifsPage = getTrendingGifsUseCase(
                     pageNumber * Constants.ITEMS_COUNT_PER_REQUEST,
                     Constants.ITEMS_COUNT_PER_REQUEST
-                )?.gifs
+                )
+                if (gifsPage?.hasNextPage == false) {
+                    actions.onLastPageLoaded()
+                }
+                gifsPage?.gifs
             }
         }
 
@@ -54,12 +58,16 @@ class PagerProvider private constructor() : DefaultLifecycleObserver {
         if (lastSearchRequest != searchRequest) searchPager = null
 
         if (searchPager == null) {
-            searchPager = GifCustomPager { pageNumber ->
-                searchGifsUseCase(
+            searchPager = GifCustomPager { pageNumber, actions ->
+                val gifsPage = searchGifsUseCase(
                     searchRequest,
                     pageNumber * Constants.ITEMS_COUNT_PER_REQUEST,
                     Constants.ITEMS_COUNT_PER_REQUEST
-                )?.gifs
+                )
+                if (gifsPage?.hasNextPage == false) {
+                    actions.onLastPageLoaded()
+                }
+                gifsPage?.gifs
             }
             lastSearchRequest = searchRequest
         }
@@ -69,11 +77,15 @@ class PagerProvider private constructor() : DefaultLifecycleObserver {
 
     fun getSavedGifsPager(getSavedGifsUseCase: GetSavedGifsUseCase): GifCustomPager {
         if (savedGifsPager == null) {
-            savedGifsPager = GifCustomPager { pageNumber ->
-                getSavedGifsUseCase(
+            savedGifsPager = GifCustomPager { pageNumber, actions ->
+                val gifsPage = getSavedGifsUseCase(
                     pageNumber * Constants.ITEMS_COUNT_PER_REQUEST,
                     Constants.ITEMS_COUNT_PER_REQUEST
-                )?.gifs ?: emptyList()
+                )
+                if (gifsPage?.hasNextPage == false) {
+                    actions.onLastPageLoaded()
+                }
+                gifsPage?.gifs ?: emptyList()
             }
         }
 

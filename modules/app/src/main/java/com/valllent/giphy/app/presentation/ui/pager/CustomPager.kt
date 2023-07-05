@@ -5,7 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 
 open class CustomPager<T>(
-    private val fetchData: suspend (Int) -> List<T>?
+    private val fetchData: suspend (Int, PagerActions<T>) -> List<T>?
 ) {
 
     companion object {
@@ -14,6 +14,8 @@ open class CustomPager<T>(
 
     private var pageNumber = 0
     private var firstLoading = true
+    private var loadingLastPage = false
+    private var lastPageLoaded = false
 
     private val _state = MutableStateFlow<PagerList<T>>(
         PagerList(
@@ -40,11 +42,10 @@ open class CustomPager<T>(
      * Can be used instead of retry.
      */
     suspend fun loadNextPage() {
-        // TODO: Add stop when no more new pages
-        if (notInLoadingState()) {
+        if (notInLoadingState() && lastPageNotLoaded()) {
             Log.d(TAG, "Loading next page...")
             flow {
-                val result = runCatching { fetchData(pageNumber) }
+                val result = runCatching { fetchData(pageNumber, PagerActions(this@CustomPager)) }
                 emit(result.getOrNull())
             }
                 .onStart { setState(newLoadingState = LoadingState.LOADING) }
@@ -65,6 +66,7 @@ open class CustomPager<T>(
                     dataList.addAll(newList)
                     pageNumber++
 
+                    if (loadingLastPage) lastPageLoaded = true
                     setState(
                         newList = dataList,
                         newLoadingState = LoadingState.NOT_LOADING
@@ -72,6 +74,10 @@ open class CustomPager<T>(
                     firstLoading = false
                 }
         }
+    }
+
+    fun onLoadingLastPage() {
+        loadingLastPage = true
     }
 
     fun modifyList(newList: List<T>) {
@@ -118,6 +124,10 @@ open class CustomPager<T>(
     private fun notInLoadingState(): Boolean {
         return state.value.appendLoadingState != LoadingState.LOADING &&
                 state.value.firstLoadingState != LoadingState.LOADING
+    }
+
+    private fun lastPageNotLoaded(): Boolean {
+        return !lastPageLoaded
     }
 
 }

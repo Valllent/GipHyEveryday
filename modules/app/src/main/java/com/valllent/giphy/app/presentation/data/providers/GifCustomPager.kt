@@ -1,11 +1,12 @@
 package com.valllent.giphy.app.presentation.data.providers
 
 import com.valllent.giphy.app.presentation.ui.pager.CustomPager
+import com.valllent.giphy.app.presentation.ui.pager.PagerActions
 import com.valllent.giphy.domain.data.Gif
 import com.valllent.giphy.domain.usecases.GetSavedStateForGifUseCase
 
 class GifCustomPager(
-    fetchData: suspend (Int) -> List<Gif>?
+    fetchData: suspend (Int, PagerActions<Gif>) -> List<Gif>?
 ) : CustomPager<Gif>(fetchData) {
 
     fun changeSavedStateForGif(id: String, isSaved: Boolean) {
