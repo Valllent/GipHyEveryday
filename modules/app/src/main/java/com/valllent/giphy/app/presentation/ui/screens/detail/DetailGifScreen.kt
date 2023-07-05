@@ -19,9 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import com.valllent.giphy.R
 import com.valllent.giphy.app.presentation.data.preview.GifPreviewData
 import com.valllent.giphy.app.presentation.ui.GlobalListeners
+import com.valllent.giphy.app.presentation.ui.utils.OnLifecycleEvent
 import com.valllent.giphy.app.presentation.ui.views.*
 import com.valllent.giphy.app.presentation.ui.wrappers.PreviewWrapper
 import com.valllent.giphy.app.presentation.ui.wrappers.ScaffoldWrapper
@@ -39,6 +41,16 @@ fun DetailGifScreen(
 
     val currentGif = pagerList.data[pagerState.currentPage]
     val isSaved = currentGif.isSaved
+
+    OnLifecycleEvent { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_CREATE -> {
+                actions.onReturnToPage()
+            }
+
+            else -> {}
+        }
+    }
 
     ScaffoldWrapper(
         topAppBarActions = {

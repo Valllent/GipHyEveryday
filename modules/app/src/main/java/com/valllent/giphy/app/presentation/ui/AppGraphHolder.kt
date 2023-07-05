@@ -134,6 +134,9 @@ sealed class Screen(
                 },
                 onChangeSavedStateForGif = {
                     viewModel.changeSavedState(it)
+                },
+                onReturnToPage = {
+                    viewModel.updateIsSavedValues()
                 }
             )
 

@@ -8,10 +8,7 @@ import com.valllent.giphy.app.presentation.data.providers.GifCustomPager
 import com.valllent.giphy.app.presentation.ui.ScreenArguments
 import com.valllent.giphy.app.presentation.ui.pager.PagerProvider
 import com.valllent.giphy.app.presentation.ui.screens.BaseViewModel
-import com.valllent.giphy.domain.usecases.ChangeSavedStateForGifUseCase
-import com.valllent.giphy.domain.usecases.GetSavedGifsUseCase
-import com.valllent.giphy.domain.usecases.GetTrendingGifsUseCase
-import com.valllent.giphy.domain.usecases.SearchGifsUseCase
+import com.valllent.giphy.domain.usecases.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -22,6 +19,7 @@ class DetailGifViewModel @Inject constructor(
     getTrendingGifsUseCase: GetTrendingGifsUseCase,
     getSavedGifsUseCase: GetSavedGifsUseCase,
     searchGifsUseCase: SearchGifsUseCase,
+    private val getSavedStateForGifUseCase: GetSavedStateForGifUseCase,
     private val changeSavedStateForGifUseCase: ChangeSavedStateForGifUseCase,
 ) : BaseViewModel() {
 
@@ -74,6 +72,12 @@ class DetailGifViewModel @Inject constructor(
         launchAsync {
             val newIsSavedValue = changeSavedStateForGifUseCase(id)
             pager.changeSavedStateForGif(id, newIsSavedValue)
+        }
+    }
+
+    fun updateIsSavedValues() {
+        launch {
+            pager.updateIsSavedValues(getSavedStateForGifUseCase)
         }
     }
 
