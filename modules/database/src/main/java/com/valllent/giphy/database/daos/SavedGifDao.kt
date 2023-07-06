@@ -7,6 +7,9 @@ import com.valllent.giphy.database.tables.SavedGif
 @Dao
 interface SavedGifDao {
 
+    @Query("SELECT COUNT(id) FROM savedGifs")
+    fun getCount(): Int
+
     @Query("SELECT id FROM savedGifs LIMIT (:count) OFFSET (:offset)")
     fun getSavedGifs(offset: Int, count: Int): List<SavedGif>?
 

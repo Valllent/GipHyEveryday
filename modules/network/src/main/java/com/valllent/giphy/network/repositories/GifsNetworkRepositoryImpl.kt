@@ -11,12 +11,12 @@ class GifsNetworkRepositoryImpl(
     private val gifsApi: GifsApi
 ) : GifsNetworkRepository {
 
-    override suspend fun getGifsByIds(ids: List<String>): GifPage? {
+    override suspend fun getGifsByIds(ids: List<String>, hasNextPage: Boolean): GifPage? {
         val networkGifResponse = CoroutineExtensions.runSafely {
             val commaSeparatedIds = ids.joinToString(separator = ",")
             gifsApi.getGifsByIds(commaSeparatedIds)
         }
-        return GifConverter(networkGifResponse)
+        return GifConverter(networkGifResponse)?.copy(hasNextPage = hasNextPage)
     }
 
     override suspend fun getTrendingGifs(offset: Int, count: Int): GifPage? {

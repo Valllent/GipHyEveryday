@@ -8,6 +8,8 @@ interface SavedGifsDbRepository {
         count: Int,
     ): List<String>
 
+    suspend fun getSavedGifsCount(): Int
+
     suspend fun changeSavedStateForGif(
         id: String
     ): Boolean

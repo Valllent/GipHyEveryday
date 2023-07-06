@@ -5,7 +5,8 @@ import com.valllent.giphy.domain.data.GifPage
 interface GifsNetworkRepository {
 
     suspend fun getGifsByIds(
-        ids: List<String>
+        ids: List<String>,
+        hasNextPage: Boolean,
     ): GifPage?
 
     suspend fun getTrendingGifs(

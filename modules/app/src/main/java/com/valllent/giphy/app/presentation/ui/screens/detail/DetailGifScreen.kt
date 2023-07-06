@@ -39,8 +39,7 @@ fun DetailGifScreen(
     val pagerList = state.pagerListFlow.collectAsState().value
     val pagerState = rememberPagerState(state.currentItemIndex)
 
-    val currentGif = pagerList.data[pagerState.currentPage]
-    val isSaved = currentGif.isSaved
+    val currentGif = pagerList.data.getOrNull(pagerState.currentPage)
 
     OnLifecycleEvent { _, event ->
         when (event) {
@@ -54,13 +53,14 @@ fun DetailGifScreen(
 
     ScaffoldWrapper(
         topAppBarActions = {
+            val isSaved = currentGif?.isSaved ?: false
             val icon = if (isSaved) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder
             val description = stringResource(if (isSaved) R.string.unsave_gif else R.string.save_gif)
             ProjectIconButton(
                 imageVector = icon,
                 contentDescription = description,
                 onClick = {
-                    actions.onChangeSavedStateForGif(currentGif.id)
+                    actions.onChangeSavedStateForGif(checkNotNull(currentGif?.id))
                 }
             )
         },

@@ -16,6 +16,12 @@ class SavedGifsDbRepositoryImpl(
         }
     }
 
+    override suspend fun getSavedGifsCount(): Int {
+        return withContext(Dispatchers.IO) {
+            savedGifDao.getCount()
+        }
+    }
+
     override suspend fun isGifSaved(id: String): Boolean {
         return withContext(Dispatchers.IO) {
             savedGifDao.getSavedGif(id) != null

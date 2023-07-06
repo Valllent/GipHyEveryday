@@ -43,7 +43,7 @@ open class CustomPager<T>(
      */
     suspend fun loadNextPage() {
         if (notInLoadingState() && lastPageNotLoaded()) {
-            Log.d(TAG, "Loading next page...")
+            Log.d(TAG, "Loading page $pageNumber")
             flow {
                 val result = runCatching { fetchData(pageNumber, PagerActions(this@CustomPager)) }
                 emit(result.getOrNull())
@@ -66,7 +66,10 @@ open class CustomPager<T>(
                     dataList.addAll(newList)
                     pageNumber++
 
-                    if (loadingLastPage) lastPageLoaded = true
+                    if (loadingLastPage) {
+                        lastPageLoaded = true
+                        Log.d(TAG, "Last page loaded")
+                    }
                     setState(
                         newList = dataList,
                         newLoadingState = LoadingState.NOT_LOADING

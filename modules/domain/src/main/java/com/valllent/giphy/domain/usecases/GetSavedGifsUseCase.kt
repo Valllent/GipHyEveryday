@@ -11,7 +11,13 @@ class GetSavedGifsUseCase(
 
     suspend operator fun invoke(offset: Int, count: Int): GifPage? {
         val idsOfSavedGifs = savedGifsRepository.getSavedGifIds(offset, count)
-        val gifPage = gifsRepository.getGifsByIds(idsOfSavedGifs) ?: return null
+        if (idsOfSavedGifs.isEmpty()) {
+            return GifPage(emptyList(), false)
+        }
+
+        val savedGifsCount = savedGifsRepository.getSavedGifsCount()
+        val hasNextPage = savedGifsCount > offset + count
+        val gifPage = gifsRepository.getGifsByIds(idsOfSavedGifs, hasNextPage) ?: return null
 
         val gifsWithSavedFlag = gifPage.gifs.map { it.copy(isSaved = true) }
         return gifPage.copy(

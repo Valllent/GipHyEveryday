@@ -85,7 +85,7 @@ class PagerProvider private constructor() : DefaultLifecycleObserver {
                 if (gifsPage?.hasNextPage == false) {
                     actions.onLastPageLoaded()
                 }
-                gifsPage?.gifs ?: emptyList()
+                gifsPage?.gifs
             }
         }
 
