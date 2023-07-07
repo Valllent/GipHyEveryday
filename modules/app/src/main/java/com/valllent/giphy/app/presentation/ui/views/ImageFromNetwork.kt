@@ -16,11 +16,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.bumptech.glide.request.RequestOptions
-import com.skydoves.landscapist.glide.GlideImage
+import coil.ImageLoader
+import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
+import coil.request.CachePolicy
 import com.valllent.giphy.R
 import com.valllent.giphy.app.presentation.ui.wrappers.PreviewWrapper
 
@@ -31,25 +34,44 @@ fun ImageFromNetwork(
     modifier: Modifier = Modifier,
     thumbnailUrl: String? = null,
 ) {
+    val imageState = remember { mutableStateOf<AsyncImagePainter.State>(AsyncImagePainter.State.Empty) }
     val urlState = remember { mutableStateOf(url) }
-    GlideImage(
-        imageModel = { urlState.value },
-        modifier = modifier.fillMaxSize(),
-        loading = { LoadingPlaceholder() },
-        failure = {
-            FailurePlaceholder {
-                val currentValue = urlState.value
-                urlState.value = if (currentValue.endsWith("/")) {
-                    currentValue.dropLast(1)
-                } else {
-                    "$currentValue/"
+
+    val imageLoader = ImageLoader.Builder(LocalContext.current)
+        .networkCachePolicy(policy = CachePolicy.ENABLED)
+        .build()
+
+    Box {
+        AsyncImage(
+            model = urlState.value,
+            contentDescription = contentDescription,
+            modifier = Modifier.fillMaxSize(),
+            onState = {
+                imageState.value = it
+            },
+            imageLoader = imageLoader,
+        )
+
+        when (imageState.value) {
+            is AsyncImagePainter.State.Loading -> {
+                LoadingPlaceholder()
+            }
+
+            is AsyncImagePainter.State.Error -> {
+                FailurePlaceholder {
+                    val currentValue = urlState.value
+                    urlState.value = if (currentValue.endsWith("/")) {
+                        currentValue.dropLast(1)
+                    } else {
+                        "$currentValue/"
+                    }
                 }
             }
-        },
-        requestOptions = {
-            RequestOptions().timeout(20_000)
+
+            else -> {}
         }
-    )
+    }
+
 }
 
 @Composable
