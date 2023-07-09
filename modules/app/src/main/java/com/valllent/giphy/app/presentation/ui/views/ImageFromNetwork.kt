@@ -20,10 +20,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.ImageLoader
+import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
-import coil.request.CachePolicy
+import coil.imageLoader
 import com.valllent.giphy.R
 import com.valllent.giphy.app.presentation.ui.wrappers.PreviewWrapper
 
@@ -32,24 +32,20 @@ fun ImageFromNetwork(
     url: String,
     contentDescription: String,
     modifier: Modifier = Modifier,
-    thumbnailUrl: String? = null,
 ) {
     val imageState = remember { mutableStateOf<AsyncImagePainter.State>(AsyncImagePainter.State.Empty) }
     val urlState = remember { mutableStateOf(url) }
-
-    val imageLoader = ImageLoader.Builder(LocalContext.current)
-        .networkCachePolicy(policy = CachePolicy.ENABLED)
-        .build()
+    val imageLoader = LocalContext.current.imageLoader
 
     Box {
         AsyncImage(
             model = urlState.value,
             contentDescription = contentDescription,
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier.fillMaxSize(),
+            imageLoader = imageLoader,
             onState = {
                 imageState.value = it
-            },
-            imageLoader = imageLoader,
+            }
         )
 
         when (imageState.value) {
@@ -71,7 +67,55 @@ fun ImageFromNetwork(
             else -> {}
         }
     }
+}
 
+@Composable
+fun ImageFromNetwork(
+    url: String,
+    contentDescription: String,
+    thumbnailUrl: String,
+    modifier: Modifier = Modifier,
+) {
+    val originalImageState = remember { mutableStateOf<AsyncImagePainter.State>(AsyncImagePainter.State.Empty) }
+    val urlState = remember { mutableStateOf(url) }
+    val imageLoader = LocalContext.current.imageLoader
+
+    Box {
+        AsyncImage(
+            model = thumbnailUrl,
+            contentDescription = contentDescription,
+            imageLoader = imageLoader,
+            modifier = modifier.fillMaxSize()
+        )
+        AsyncImage(
+            model = urlState.value,
+            contentDescription = contentDescription,
+            imageLoader = imageLoader,
+            modifier = modifier.fillMaxSize().zIndex(1f),
+            onState = {
+                originalImageState.value = it
+            }
+        )
+
+        when (originalImageState.value) {
+            is AsyncImagePainter.State.Loading -> {
+                LoadingPlaceholder()
+            }
+
+            is AsyncImagePainter.State.Error -> {
+                FailurePlaceholder {
+                    val currentValue = urlState.value
+                    urlState.value = if (currentValue.endsWith("/")) {
+                        currentValue.dropLast(1)
+                    } else {
+                        "$currentValue/"
+                    }
+                }
+            }
+
+            else -> {}
+        }
+    }
 }
 
 @Composable

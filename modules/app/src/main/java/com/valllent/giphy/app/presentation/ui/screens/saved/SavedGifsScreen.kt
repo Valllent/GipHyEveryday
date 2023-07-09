@@ -174,7 +174,11 @@ private fun GifItem(
             tonalElevation = 24.dp,
             shadowElevation = 8.dp
         ) {
-            ImageFromNetwork(gif.mediumUrl, gif.title, thumbnailUrl = gif.thumbnailUrl)
+            ImageFromNetwork(
+                url = gif.mediumUrl,
+                contentDescription = gif.title,
+                thumbnailUrl = gif.thumbnailUrl
+            )
         }
     }
 }

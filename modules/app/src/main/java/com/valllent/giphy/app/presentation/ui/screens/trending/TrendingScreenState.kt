@@ -10,5 +10,4 @@ data class TrendingScreenState(
     val searchRequestIsCorrect: Boolean,
     val showSearchField: Boolean,
     val showSearchResultList: Boolean,
-    val searchFieldFocusRequestedAlready: Boolean
 )

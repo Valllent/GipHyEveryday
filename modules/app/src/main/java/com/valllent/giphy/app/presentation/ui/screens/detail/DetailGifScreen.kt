@@ -109,7 +109,11 @@ private fun DetailGif(gif: Gif) {
                 .fillMaxWidth()
                 .aspectRatio(gif.width.toFloat() / gif.height)
         ) {
-            ImageFromNetwork(gif.mediumUrl, gif.title)
+            ImageFromNetwork(
+                url = gif.mediumUrl,
+                contentDescription = gif.title,
+                thumbnailUrl = gif.thumbnailUrl
+            )
         }
         if (gif.postedBy.isNotBlank()) {
             SubtitleOnSurface(

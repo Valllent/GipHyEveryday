@@ -62,9 +62,6 @@ sealed class Screen(
                 onChangeSavedStateForGif = {
                     viewModel.changeSavedState(it)
                 },
-                onSearchFieldFocusRequested = {
-                    viewModel.searchFieldFocusRequested()
-                },
                 onLoadNextPageOrRetry = {
                     viewModel.loadNextPageOrRetryPrevious()
                 },

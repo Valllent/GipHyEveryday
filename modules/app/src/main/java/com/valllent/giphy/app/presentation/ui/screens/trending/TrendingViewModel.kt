@@ -34,7 +34,6 @@ class TrendingViewModel @Inject constructor(
             searchRequestIsCorrect = false,
             showSearchField = false,
             showSearchResultList = false,
-            searchFieldFocusRequestedAlready = false
         )
     )
     val state: State<TrendingScreenState>
@@ -92,13 +91,6 @@ class TrendingViewModel @Inject constructor(
             gifs = trendingPager.state,
             showSearchField = false,
             showSearchResultList = false,
-            searchFieldFocusRequestedAlready = false,
-        )
-    }
-
-    fun searchFieldFocusRequested() {
-        _state.value = _state.value.copy(
-            searchFieldFocusRequestedAlready = true
         )
     }
 

@@ -11,7 +11,6 @@ data class TrendingScreenActions(
     val onSearchClick: () -> Unit,
     val onSearchRequestChange: (String) -> Unit,
     val onChangeSavedStateForGif: (String) -> Unit,
-    val onSearchFieldFocusRequested: () -> Unit,
     val onLoadNextPageOrRetry: () -> Unit,
     val onReturnToPage: () -> Unit,
 )

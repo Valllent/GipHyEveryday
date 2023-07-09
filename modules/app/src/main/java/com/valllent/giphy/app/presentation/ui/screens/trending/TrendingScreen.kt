@@ -2,6 +2,7 @@
 
 package com.valllent.giphy.app.presentation.ui.screens.trending
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -31,6 +32,7 @@ import com.valllent.giphy.app.presentation.ui.utils.OnLifecycleEvent
 import com.valllent.giphy.app.presentation.ui.views.*
 import com.valllent.giphy.app.presentation.ui.wrappers.ScaffoldWrapper
 import com.valllent.giphy.domain.data.Gif
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -43,6 +45,7 @@ fun TrendingScreen(
     val coroutineScope = rememberCoroutineScope()
     val trendingLazyListState = rememberLazyListState()
     val searchLazyListState = rememberLazyListState()
+    val focusRequestedAlready = remember { mutableStateOf(false) }
     val searchFieldFocusRequester = remember { FocusRequester() }
     val currentLazyListState = remember { mutableStateOf(trendingLazyListState) }
     val currentPagerType = remember { mutableStateOf(OpenDetailScreenLambda.PagerType.TRENDING) }
@@ -66,14 +69,17 @@ fun TrendingScreen(
     }
 
     LaunchedEffect(state.showSearchField) {
-        if (state.showSearchField) {
-            if (state.searchFieldFocusRequestedAlready.not()) {
-                if (currentLazyListState.value.firstVisibleItemIndex in 0..5) {
-                    currentLazyListState.value.animateScrollToItem(0)
-                }
-                searchFieldFocusRequester.requestFocus()
+        delay(300)
+        if (state.showSearchField && !focusRequestedAlready.value) {
+            focusRequestedAlready.value = true
+            if (currentLazyListState.value.firstVisibleItemIndex in 0..3) {
+                currentLazyListState.value.animateScrollToItem(0)
             }
-            actions.onSearchFieldFocusRequested()
+            try {
+                searchFieldFocusRequester.requestFocus()
+            } catch (any: Throwable) {
+                Log.d("TrendingScreen", "Can't request focus")
+            }
         }
     }
 
@@ -88,6 +94,7 @@ fun TrendingScreen(
                 onClick = {
                     if (state.showSearchField) {
                         actions.onCloseSearch()
+                        focusRequestedAlready.value = false
                     } else {
                         actions.onOpenSearch()
                     }
@@ -246,7 +253,11 @@ private fun GifItem(
             tonalElevation = 24.dp,
             shadowElevation = 8.dp
         ) {
-            ImageFromNetwork(gif.mediumUrl, gif.title, thumbnailUrl = gif.thumbnailUrl)
+            ImageFromNetwork(
+                url = gif.mediumUrl,
+                contentDescription = gif.title,
+                thumbnailUrl = gif.thumbnailUrl
+            )
         }
     }
 }

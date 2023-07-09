@@ -29,7 +29,7 @@ fun SearchField(
     enabled: Boolean,
     onSearchRequestChange: (String) -> Unit,
     onSearchClick: () -> Unit,
-    focusRequester: FocusRequester = FocusRequester(),
+    focusRequester: FocusRequester,
 ) {
     Surface(
         modifier = Modifier
@@ -46,8 +46,7 @@ fun SearchField(
             onValueChange = {
                 onSearchRequestChange(it)
             },
-            modifier = Modifier
-                .focusRequester(focusRequester),
+            modifier = Modifier.focusRequester(focusRequester),
             singleLine = true,
             textStyle = MaterialTheme.typography.titleLarge,
             label = {
@@ -87,6 +86,6 @@ fun SearchField(
 @Composable
 private fun PreviewSearchField() {
     PreviewWrapper {
-        SearchField(request = "Cat", true, {}, {})
+        SearchField(request = "Cat", true, {}, {}, FocusRequester())
     }
 }

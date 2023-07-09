@@ -62,6 +62,7 @@ dependencies {
 
     // Image downloader
     implementation "io.coil-kt:coil-compose:2.4.0"
+    implementation "io.coil-kt:coil-gif:2.4.0"
 
     // Pagination
     implementation "androidx.paging:paging-compose:3.2.0-beta01"
