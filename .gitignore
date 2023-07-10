@@ -4,17 +4,4 @@ local.properties
 build
 
 # Idea config
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-
-# My IDEA config
-/.idea/modules
-/.idea/compiler.xml
-/.idea/gradle.xml
-/.idea/kotlinc.xml
-/.idea/misc.xml
-/.idea/deploymentTargetDropDown.xml
+/.idea
