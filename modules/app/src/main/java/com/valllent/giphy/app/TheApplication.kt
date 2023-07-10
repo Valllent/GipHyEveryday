@@ -26,6 +26,7 @@ class TheApplication : Application(), ImageLoaderFactory {
                 .maxSizePercent(0.20)
                 .build()
         }
+        .respectCacheHeaders(false)
         .components {
             if (Build.VERSION.SDK_INT > 28) {
                 add(ImageDecoderDecoder.Factory())
