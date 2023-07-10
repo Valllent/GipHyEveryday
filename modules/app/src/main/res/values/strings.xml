@@ -11,6 +11,8 @@
     <string name="unsave_gif">Unsave gif</string>
     <string name="can_not_fetch_data">Can\'t fetch data</string>
     <string name="empty_saved_list">Empty saved list</string>
+    <string name="scroll_to_next">Scroll to the next gif</string>
+    <string name="developed_by">Developed by Valllent</string>
 
     <string name="trending">Trending</string>
     <string name="saved">Saved</string>

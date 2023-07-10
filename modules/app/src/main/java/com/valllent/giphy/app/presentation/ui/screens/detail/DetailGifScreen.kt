@@ -1,13 +1,24 @@
 package com.valllent.giphy.app.presentation.ui.screens.detail
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -21,10 +32,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import com.valllent.giphy.R
+import com.valllent.giphy.app.presentation.data.DateTimeUtils
 import com.valllent.giphy.app.presentation.data.preview.GifPreviewData
 import com.valllent.giphy.app.presentation.ui.GlobalListeners
 import com.valllent.giphy.app.presentation.ui.utils.OnLifecycleEvent
-import com.valllent.giphy.app.presentation.ui.views.*
+import com.valllent.giphy.app.presentation.ui.views.DataFetchingFailed
+import com.valllent.giphy.app.presentation.ui.views.ImageFromNetwork
+import com.valllent.giphy.app.presentation.ui.views.InProgress
+import com.valllent.giphy.app.presentation.ui.views.LazyPagerWithEventTracking
+import com.valllent.giphy.app.presentation.ui.views.ProjectIconButton
+import com.valllent.giphy.app.presentation.ui.views.SubtitleOnSurface
+import com.valllent.giphy.app.presentation.ui.views.TitleOnSurface
 import com.valllent.giphy.app.presentation.ui.wrappers.PreviewWrapper
 import com.valllent.giphy.app.presentation.ui.wrappers.ScaffoldWrapper
 import com.valllent.giphy.domain.data.Gif
@@ -135,9 +153,25 @@ private fun DetailGif(gif: Gif) {
             shape = MaterialTheme.shapes.medium,
         ) {
             Text(
-                text = gif.postedDatetime,
+                text = DateTimeUtils.format(gif.postedDatetime),
                 modifier = Modifier.padding(8.dp),
                 style = MaterialTheme.typography.bodyLarge,
+            )
+        }
+        Spacer(
+            modifier = Modifier.height(24.dp)
+        )
+        Row(
+            modifier = Modifier.align(Alignment.End)
+                .padding(bottom = 8.dp)
+        ) {
+            Text(stringResource(R.string.scroll_to_next))
+            Spacer(
+                modifier = Modifier.width(8.dp)
+            )
+            Icon(
+                Icons.Filled.KeyboardArrowRight,
+                contentDescription = stringResource(R.string.scroll_to_next)
             )
         }
     }
