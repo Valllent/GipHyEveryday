@@ -23,7 +23,7 @@ fun Logo(modifier: Modifier = Modifier, fontSize: TextUnit = 28.sp) {
         color = MaterialTheme.colorScheme.primary,
     ) {
         Text(
-            stringResource(R.string.app_name),
+            stringResource(R.string.app_name_short),
             modifier = Modifier.padding(16.dp),
             fontSize = fontSize,
             maxLines = 1

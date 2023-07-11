@@ -34,7 +34,7 @@ fun ProjectTopAppBar(
                 TitleOnSurface(
                     modifier = Modifier
                         .clickable { onLogoClick() },
-                    text = stringResource(R.string.app_name),
+                    text = stringResource(R.string.app_name_short),
                     textColor = MaterialTheme.colorScheme.onPrimary,
                     backgroundColor = MaterialTheme.colorScheme.primary,
                 )
